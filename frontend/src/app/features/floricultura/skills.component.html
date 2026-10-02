@@ -1,0 +1,41 @@
+<div class="prateleiras">
+  @for (prateleira of prateleiras(); track prateleira.categoria) {
+    <section class="prateleira" [attr.aria-labelledby]="'prateleira-' + prateleira.categoria">
+      <h3 class="prateleira__titulo" [id]="'prateleira-' + prateleira.categoria">
+        {{ prateleira.rotulo }}
+      </h3>
+      <ul class="prateleira__skills">
+        @for (skill of prateleira.skills; track skill.id) {
+          <li>
+            <button
+              type="button"
+              app-tag
+              [tom]="skill.destaque ? 'destaque' : 'neutro'"
+              [ativa]="estado.filtroTecnologia() === skill.id"
+              [attr.aria-pressed]="estado.filtroTecnologia() === skill.id"
+              (click)="estado.alternarTecnologia(skill.id)"
+            >
+              {{ skill.nome }}
+              @if (totalPorSkill().get(skill.id); as total) {
+                <span class="contagem" aria-hidden="true">{{ total }}</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>
+
+<div class="feedback" aria-live="polite">
+  @if (feedback(); as f) {
+    <p>
+      {{ f.texto }}
+      @if (f.temProjetos) {
+        <a [routerLink]="rotaProjetos()" fragment="livraria">Ver projetos</a>
+      }
+    </p>
+  } @else {
+    <p class="dica">Escolha uma skill para ver os projetos em que ela aparece.</p>
+  }
+</div>
