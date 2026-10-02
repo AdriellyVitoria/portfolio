@@ -1,7 +1,7 @@
-import type { FonteDados } from './environment';
+import type { Environment } from './environment.model';
 
-export const environment = {
+export const environment: Environment = {
   producao: false,
-  fonteDados: 'mock' as FonteDados,
+  fonteDados: 'mock',
   apiUrl: 'http://localhost:8080',
 };
