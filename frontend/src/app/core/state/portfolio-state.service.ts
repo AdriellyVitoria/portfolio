@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ProjetoRepository } from '../data/projeto.repository';
 import { SkillRepository } from '../data/skill.repository';
-import type { Area, Projeto, Skill } from '../models';
+import type { Area, PainelCafe, Projeto, Skill } from '../models';
 
 /**
  * Estado compartilhado do portfólio.
@@ -28,13 +28,17 @@ export class PortfolioStateService {
   private readonly _areaAtual = signal<Area>('entrada');
   private readonly _projetoSelecionadoId = signal<string | null>(null);
   private readonly _filtroTecnologia = signal<string | null>(null);
+  private readonly _painelCafe = signal<PainelCafe | null>(null);
 
   readonly areaAtual = this._areaAtual.asReadonly();
   readonly projetoSelecionadoId = this._projetoSelecionadoId.asReadonly();
   /** Id da skill usada como filtro (ex.: 'java'). */
   readonly filtroTecnologia = this._filtroTecnologia.asReadonly();
+  readonly painelCafe = this._painelCafe.asReadonly();
 
   // --- Derivados ---
+  readonly skillsPorId = computed(() => new Map(this.skills().map((s) => [s.id, s])));
+
   readonly projetoSelecionado = computed(() => {
     const id = this._projetoSelecionadoId();
     return id ? this.projetos().find((p) => p.id === id) : undefined;
@@ -89,6 +93,30 @@ export class PortfolioStateService {
 
   limparDestaque(): void {
     this._filtroTecnologia.set(null);
+  }
+
+  /** Liga o filtro da tecnologia ou desliga, se ela já for a filtrada. */
+  alternarTecnologia(termo: string): void {
+    const skill = this.encontrarSkill(termo);
+    if (skill && this._filtroTecnologia() === skill.id) {
+      this.limparDestaque();
+    } else {
+      this.destacarTecnologia(termo);
+    }
+  }
+
+  abrirPainelCafe(painel: PainelCafe): void {
+    this._painelCafe.set(painel);
+  }
+
+  fecharPainelCafe(): void {
+    this._painelCafe.set(null);
+  }
+
+  /** Converte ids de tecnologias (de um projeto ou experiência) nas skills completas. */
+  skillsDe(ids: readonly string[]): Skill[] {
+    const mapa = this.skillsPorId();
+    return ids.flatMap((id) => mapa.get(id) ?? []);
   }
 
   encontrarSkill(termo: string): Skill | undefined {
