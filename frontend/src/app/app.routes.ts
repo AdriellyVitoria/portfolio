@@ -5,8 +5,18 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'simples' },
   {
     path: 'simples',
-    title: 'Adrielly — Portfólio',
     loadComponent: () => import('./features/modo-simples/modo-simples.page'),
+    children: [
+      {
+        path: 'projetos/:id',
+        loadComponent: () => import('./features/modo-simples/projeto.rota'),
+      },
+    ],
+  },
+  {
+    // Experiência 3D (beta). Vira a rota raiz quando estiver pronta.
+    path: '3d',
+    loadComponent: () => import('./features/experiencia-3d/experiencia-3d.page'),
   },
   { path: '**', redirectTo: 'simples' },
 ];
