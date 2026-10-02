@@ -1,0 +1,41 @@
+:host {
+  display: grid;
+  gap: var(--esp-6);
+}
+
+.resumo {
+  color: var(--texto-suave);
+  font-size: var(--texto-lg);
+}
+
+.bloco {
+  display: grid;
+  gap: var(--esp-2);
+
+  &__titulo {
+    font-size: var(--texto-lg);
+    color: var(--cor-verde-escuro);
+  }
+}
+
+.lista {
+  margin: 0;
+  padding-left: var(--esp-6);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-6);
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--borda);
+}

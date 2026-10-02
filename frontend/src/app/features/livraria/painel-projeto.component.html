@@ -1,0 +1,37 @@
+<p class="resumo">{{ projeto().descricaoCurta }}</p>
+
+<section class="bloco">
+  <h3 class="bloco__titulo">O problema</h3>
+  <p>{{ projeto().problema }}</p>
+</section>
+
+@if (projeto().funcionalidades.length) {
+  <section class="bloco">
+    <h3 class="bloco__titulo">Principais funcionalidades</h3>
+    <ul class="lista">
+      @for (item of projeto().funcionalidades; track $index) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  </section>
+}
+
+<section class="bloco">
+  <h3 class="bloco__titulo">Tecnologias</h3>
+  <ul class="tags">
+    @for (skill of tecnologias(); track skill.id) {
+      <li app-tag [tom]="skill.destaque ? 'destaque' : 'neutro'">{{ skill.nome }}</li>
+    }
+  </ul>
+</section>
+
+@if (projeto().githubUrl || projeto().demoUrl) {
+  <div class="links">
+    @if (projeto().githubUrl; as url) {
+      <app-icone-link icone="github" rotulo="Código no GitHub" [url]="url" />
+    }
+    @if (projeto().demoUrl; as url) {
+      <app-icone-link icone="link" rotulo="Ver demo" [url]="url" />
+    }
+  </div>
+}

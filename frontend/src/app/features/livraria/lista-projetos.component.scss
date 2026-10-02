@@ -1,0 +1,29 @@
+:host {
+  display: grid;
+  gap: var(--esp-4);
+}
+
+.filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.resumo {
+  color: var(--texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--esp-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aviso {
+  color: var(--texto-suave);
+  font-style: italic;
+}

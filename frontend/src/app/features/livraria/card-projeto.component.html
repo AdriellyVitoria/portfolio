@@ -1,0 +1,17 @@
+<article class="card">
+  <div class="card__lombada" [style.background]="corLombada()"></div>
+  <div class="card__corpo">
+    @if (projeto().destaque) {
+      <span app-tag tom="destaque" class="card__selo">Destaque</span>
+    }
+    <h3 class="card__titulo">
+      <a class="card__link" [routerLink]="rota()">{{ projeto().nome }}</a>
+    </h3>
+    <p class="card__descricao">{{ projeto().descricaoCurta }}</p>
+    <ul class="card__tags" aria-label="Tecnologias">
+      @for (skill of tecnologias(); track skill.id) {
+        <li app-tag>{{ skill.nome }}</li>
+      }
+    </ul>
+  </div>
+</article>

@@ -1,0 +1,42 @@
+<div class="filtro" role="group" aria-label="Filtrar projetos por tecnologia">
+  <button
+    type="button"
+    app-tag
+    [ativa]="!estado.filtroTecnologia()"
+    [attr.aria-pressed]="!estado.filtroTecnologia()"
+    (click)="estado.limparDestaque()"
+  >
+    Todas
+  </button>
+  @for (skill of tecnologiasDisponiveis(); track skill.id) {
+    <button
+      type="button"
+      app-tag
+      [ativa]="estado.filtroTecnologia() === skill.id"
+      [attr.aria-pressed]="estado.filtroTecnologia() === skill.id"
+      (click)="estado.alternarTecnologia(skill.id)"
+    >
+      {{ skill.nome }}
+    </button>
+  }
+</div>
+
+<p class="resumo" aria-live="polite">{{ resumoFiltro() }}</p>
+
+@if (estado.carregando()) {
+  <p class="aviso">Tirando os livros da estante…</p>
+} @else {
+  <ul class="grade">
+    @for (projeto of projetosVisiveis(); track projeto.id) {
+      <li>
+        <app-card-projeto
+          [projeto]="projeto"
+          [tecnologias]="estado.skillsDe(projeto.tecnologias)"
+          [rota]="rotaBase() + '/' + projeto.id"
+        />
+      </li>
+    } @empty {
+      <li class="aviso">Nenhum projeto com essa tecnologia ainda.</li>
+    }
+  </ul>
+}

@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-md);
+  background: var(--superficie);
+  box-shadow: var(--sombra-sm);
+  transition:
+    box-shadow var(--duracao-media) var(--easing-padrao),
+    transform var(--duracao-media) var(--easing-padrao);
+
+  &:hover,
+  &:focus-within {
+    box-shadow: var(--sombra-md);
+    transform: translateY(-2px);
+  }
+
+  // A lombada lembra um livro na estante.
+  &__lombada {
+    flex: 0 0 10px;
+  }
+
+  &__corpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--esp-3);
+    padding: var(--esp-6);
+  }
+
+  &__selo {
+    align-self: flex-start;
+  }
+
+  &__titulo {
+    font-size: var(--texto-xl);
+  }
+
+  &__link {
+    color: var(--texto);
+    text-decoration: none;
+
+    // Estica a área clicável para o card todo.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        outline: 3px solid var(--foco);
+        outline-offset: -3px;
+        border-radius: var(--raio-md);
+      }
+    }
+  }
+
+  &__descricao {
+    color: var(--texto-suave);
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-2);
+    margin: auto 0 0;
+    padding: 0;
+    list-style: none;
+  }
+}
