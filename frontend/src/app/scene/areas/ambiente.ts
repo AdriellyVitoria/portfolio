@@ -280,15 +280,15 @@ export class Ambiente implements ParteCena {
       this.grupo.add(planta);
     });
 
-    // Quadros na parede do fundo, entre as áreas.
+    // Quadros nas paredes laterais (a parede do fundo é da estante, da étagère e do balcão).
     const moldura = materialFosco(PALETA.marrom);
     [
-      { x: -2.5, cor: PALETA.rosa },
-      { x: 2.5, cor: PALETA.lilas },
-    ].forEach(({ x, cor }) => {
+      { lado: -1, cor: PALETA.rosa },
+      { lado: 1, cor: PALETA.lilas },
+    ].forEach(({ lado, cor }) => {
       this.grupo.add(
-        caixa(1.0, 0.8, 0.05, moldura, x, 2.3, -4.97),
-        caixa(0.84, 0.64, 0.02, materialFosco(cor), x, 2.3, -4.94),
+        caixa(0.05, 0.8, 1.0, moldura, lado * 7.97, 2.2, 0.2),
+        caixa(0.02, 0.64, 0.84, materialFosco(cor), lado * 7.94, 2.2, 0.2),
       );
     });
   }
