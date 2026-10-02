@@ -1,0 +1,47 @@
+@if (mostrar() !== 'trajetoria') {
+  <div class="colunas">
+    <section class="bloco" aria-labelledby="sobre-apresentacao">
+      <h3 id="sobre-apresentacao" class="bloco__titulo">Quem sou</h3>
+      <p>{{ perfil().apresentacao }}</p>
+    </section>
+
+    <section class="bloco" aria-labelledby="sobre-objetivos">
+      <h3 id="sobre-objetivos" class="bloco__titulo">Objetivos</h3>
+      <p>{{ perfil().objetivos }}</p>
+    </section>
+  </div>
+}
+
+@if (mostrar() !== 'apresentacao') {
+  <section class="bloco" aria-labelledby="sobre-experiencia">
+    <h3 id="sobre-experiencia" class="bloco__titulo">Experiência</h3>
+    <ol class="linha-tempo">
+      @for (exp of perfil().experiencias; track exp.id) {
+        <li class="item">
+          <p class="item__periodo">{{ exp.inicio | mesAno }} – {{ exp.fim | mesAno: 'atual' }}</p>
+          <h4 class="item__titulo">{{ exp.cargo }} · {{ exp.empresa }}</h4>
+          <p>{{ exp.descricao }}</p>
+          <ul class="item__tags" aria-label="Tecnologias">
+            @for (skill of estado.skillsDe(exp.tecnologias); track skill.id) {
+              <li app-tag>{{ skill.nome }}</li>
+            }
+          </ul>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="bloco" aria-labelledby="sobre-formacao">
+    <h3 id="sobre-formacao" class="bloco__titulo">Formação</h3>
+    <ol class="linha-tempo">
+      @for (form of perfil().formacoes; track form.id) {
+        <li class="item">
+          <p class="item__periodo">
+            {{ form.inicio | mesAno }} – {{ form.fim | mesAno: 'em andamento' }}
+          </p>
+          <h4 class="item__titulo">{{ form.curso }} · {{ form.instituicao }}</h4>
+        </li>
+      }
+    </ol>
+  </section>
+}

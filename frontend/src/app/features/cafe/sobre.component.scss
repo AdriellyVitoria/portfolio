@@ -1,0 +1,74 @@
+@use 'mixins' as *;
+
+:host {
+  display: grid;
+  gap: var(--esp-12);
+}
+
+.colunas {
+  display: grid;
+  gap: var(--esp-8);
+
+  @include a-partir-de($bp-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.bloco {
+  display: grid;
+  align-content: start;
+  gap: var(--esp-4);
+
+  &__titulo {
+    font-size: var(--texto-xl);
+    color: var(--cor-verde-escuro);
+  }
+}
+
+.linha-tempo {
+  display: grid;
+  gap: var(--esp-6);
+  margin: 0;
+  padding: 0 0 0 var(--esp-6);
+  border-left: 2px solid var(--borda);
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  gap: var(--esp-2);
+
+  // Marcador da linha do tempo.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.4em;
+    left: calc(-1 * var(--esp-6) - 7px);
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--fundo);
+    border-radius: 50%;
+    background: var(--cor-laranja);
+  }
+
+  &__periodo {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+  }
+
+  &__titulo {
+    font-family: var(--fonte-texto);
+    font-size: var(--texto-lg);
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
