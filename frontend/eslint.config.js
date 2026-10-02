@@ -35,7 +35,7 @@ module.exports = defineConfig([
     },
   },
   {
-    // Fronteiras da arquitetura (ver plano.md §2):
+    // Fronteiras da arquitetura (ver frontend/README.md):
     // features → core/shared, scene → core, core → core, shared → shared.
     // Só a feature que hospeda o canvas (experiencia-3d) pode falar com a scene.
     files: ['src/app/**/*.ts'],
@@ -89,7 +89,7 @@ module.exports = defineConfig([
     // Dentro das camadas, proíbe importar arquivos fora delas (ex.: core → app.config.ts).
     // Os arquivos da raiz (app.ts, app.config.ts, app.routes.ts) compõem tudo e ficam livres.
     files: ['src/app/*/**/*.ts'],
-    rules: { 'boundaries/no-unknown': 'error' },
+    rules: { 'boundaries/no-unknown-dependencies': 'error' },
   },
   {
     files: ['**/*.html'],

@@ -2,6 +2,8 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
+import { environment } from '../environments/environment';
+import { provideDados } from './core/data/provide-dados';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -9,5 +11,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
     provideClientHydration(withEventReplay()),
+    provideDados({ fonte: environment.fonteDados, latenciaMockMs: environment.latenciaMockMs }),
   ],
 };
