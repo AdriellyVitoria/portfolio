@@ -1,20 +1,77 @@
-<main class="pagina">
-  <header class="hero">
-    <p class="hero__sobretitulo">Café · Livraria · Floricultura</p>
-    <h1 class="hero__titulo">Adrielly</h1>
-    <p class="hero__subtitulo">Desenvolvedora Full Stack</p>
-  </header>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
-  <section class="aviso" aria-labelledby="aviso-titulo">
-    <h2 id="aviso-titulo" class="aviso__titulo">Preparando o café…</h2>
-    <p>Este portfólio está em construção. Volte em breve!</p>
+<header class="topo">
+  <div class="topo__interno">
+    <a class="topo__marca" routerLink="/simples">{{ perfil()?.nome ?? 'Portfólio' }}</a>
+    <nav aria-label="Seções">
+      <ul class="topo__nav">
+        <li><a routerLink="/simples" fragment="livraria">Projetos</a></li>
+        <li><a routerLink="/simples" fragment="floricultura">Skills</a></li>
+        <li><a routerLink="/simples" fragment="cafe">Sobre</a></li>
+        <li><a routerLink="/simples" fragment="contato">Contato</a></li>
+        <li><a class="topo__3d" routerLink="/3d">Explorar em 3D</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo" class="conteudo" tabindex="-1">
+  @if (perfil(); as p) {
+    <section class="hero" aria-labelledby="hero-titulo">
+      <p class="sobretitulo">Café · Livraria · Floricultura</p>
+      <h1 id="hero-titulo" class="hero__titulo">{{ p.nome }}</h1>
+      <p class="hero__subtitulo">{{ p.titulo }}</p>
+      <div class="hero__acoes">
+        <a app-botao routerLink="/simples" fragment="livraria">Ver projetos</a>
+        <a app-botao variante="secundario" routerLink="/simples" fragment="contato">Contato</a>
+      </div>
+    </section>
+  } @else {
+    <p class="carregando">Preparando o café…</p>
+  }
+
+  <section id="livraria" class="secao" aria-labelledby="titulo-livraria">
+    <header class="secao__cabecalho">
+      <p class="sobretitulo">Livraria</p>
+      <h2 id="titulo-livraria" class="secao__titulo">Projetos</h2>
+      <p class="secao__descricao">
+        Cada livro da estante é um projeto. Abra um para ver os detalhes.
+      </p>
+    </header>
+    <app-lista-projetos />
   </section>
 
-  <ul class="paleta" aria-label="Paleta de cores do projeto">
-    @for (cor of paleta; track cor) {
-      <li class="paleta__cor" [style.background]="'var(--cor-' + cor + ')'">
-        <span class="sr-only">{{ cor }}</span>
-      </li>
-    }
-  </ul>
+  <section id="floricultura" class="secao" aria-labelledby="titulo-floricultura">
+    <header class="secao__cabecalho">
+      <p class="sobretitulo">Floricultura</p>
+      <h2 id="titulo-floricultura" class="secao__titulo">Skills</h2>
+      <p class="secao__descricao">As tecnologias com que trabalho, organizadas por prateleira.</p>
+    </header>
+    <app-skills />
+  </section>
+
+  @if (perfil(); as p) {
+    <section id="cafe" class="secao" aria-labelledby="titulo-cafe">
+      <header class="secao__cabecalho">
+        <p class="sobretitulo">Café</p>
+        <h2 id="titulo-cafe" class="secao__titulo">Sobre mim</h2>
+      </header>
+      <app-sobre [perfil]="p" />
+    </section>
+
+    <section id="contato" class="secao secao--contato" aria-labelledby="titulo-contato">
+      <header class="secao__cabecalho">
+        <p class="sobretitulo">Vamos conversar?</p>
+        <h2 id="titulo-contato" class="secao__titulo">Contato</h2>
+      </header>
+      <app-contato [perfil]="p" />
+    </section>
+  }
 </main>
+
+<footer class="rodape">
+  <p>© {{ anoAtual }} {{ perfil()?.nome }} · Feito com Angular, café e folhas de outono.</p>
+</footer>
+
+<!-- Painel de projeto (rota filha /simples/projetos/:id) -->
+<router-outlet />
