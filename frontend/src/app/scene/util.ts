@@ -2,6 +2,8 @@ import {
   BoxGeometry,
   CanvasTexture,
   type BufferGeometry,
+  Float32BufferAttribute,
+  PlaneGeometry,
   InstancedMesh,
   type Material,
   Matrix4,
@@ -66,14 +68,16 @@ export function fundirEstaticos(container: Object3D): void {
 
   for (const meshes of grupos.values()) {
     if (meshes.length < 2) continue;
-    const geometrias = meshes.map((mesh) => {
+    let geometrias = meshes.map((mesh) => {
       const relativa = new Matrix4().multiplyMatrices(inversa, mesh.matrixWorld);
-      const g = mesh.geometry.clone().applyMatrix4(relativa);
-      return g.index ? g : null;
+      return mesh.geometry.clone().applyMatrix4(relativa);
     });
-    if (geometrias.some((g) => !g)) continue;
-    const fundida = mergeGeometries(geometrias as BufferGeometry[]);
-    geometrias.forEach((g) => g!.dispose());
+    // mergeGeometries exige todas indexadas ou todas não indexadas.
+    if (geometrias.some((g) => !g.index)) {
+      geometrias = geometrias.map((g) => (g.index ? g.toNonIndexed() : g));
+    }
+    const fundida = mergeGeometries(geometrias);
+    geometrias.forEach((g) => g.dispose());
     if (!fundida) continue;
 
     const unico = new Mesh(fundida, meshes[0].material);
@@ -164,6 +168,72 @@ export function texturaDeTexto(texto: string, opcoes: OpcoesTexto = {}): CanvasT
   textura.colorSpace = SRGBColorSpace;
   textura.anisotropy = 4;
   return textura;
+}
+
+export interface AtlasDeTexto {
+  textura: CanvasTexture;
+  /** Plano já com as coordenadas de textura apontando para o texto `indice`. */
+  plano(indice: number, largura: number, altura: number): PlaneGeometry;
+}
+
+/**
+ * Vários textos numa única textura (atlas). Todas as etiquetas usam o mesmo material,
+ * então podem ser fundidas num só mesh: dezenas de plaquinhas, uma chamada de desenho.
+ * Devolve `null` onde não há canvas 2D (ex.: testes em jsdom).
+ */
+export function atlasDeTexto(
+  textos: string[],
+  {
+    fundo = '#fbf6ee',
+    cor = '#3b261b',
+    fonte = '600 64px "Inter Variable", system-ui, sans-serif',
+  } = {},
+): AtlasDeTexto | null {
+  if (typeof document === 'undefined' || !textos.length) {
+    return null;
+  }
+  const larguraCelula = 512;
+  const alturaCelula = 140;
+  const colunas = 2;
+  const linhas = Math.ceil(textos.length / colunas);
+  const canvas = document.createElement('canvas');
+  canvas.width = larguraCelula * colunas;
+  canvas.height = alturaCelula * linhas;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return null;
+  }
+  ctx.fillStyle = fundo;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = cor;
+  ctx.font = fonte;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  textos.forEach((texto, i) => {
+    const x = (i % colunas) * larguraCelula + larguraCelula / 2;
+    const y = Math.floor(i / colunas) * alturaCelula + alturaCelula / 2;
+    ctx.fillText(texto, x, y, larguraCelula - 32);
+  });
+
+  const textura = new CanvasTexture(canvas);
+  textura.colorSpace = SRGBColorSpace;
+  textura.anisotropy = 4;
+
+  return {
+    textura,
+    plano(indice, largura, altura) {
+      const coluna = indice % colunas;
+      const linha = Math.floor(indice / colunas);
+      const u0 = coluna / colunas;
+      const u1 = (coluna + 1) / colunas;
+      // A textura é invertida no eixo vertical (flipY): a linha 0 fica em v = 1.
+      const v1 = 1 - linha / linhas;
+      const v0 = 1 - (linha + 1) / linhas;
+      const geometria = new PlaneGeometry(largura, altura);
+      geometria.setAttribute('uv', new Float32BufferAttribute([u0, v1, u1, v1, u0, v0, u1, v0], 2));
+      return geometria;
+    },
+  };
 }
 
 /** Libera da GPU geometrias, materiais e texturas de um objeto e de todos os filhos. */

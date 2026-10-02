@@ -15,6 +15,9 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ anchorScrolling: 'enabled' }),
     ),
     provideClientHydration(withEventReplay()),
-    provideDados({ fonte: environment.fonteDados, latenciaMockMs: environment.latenciaMockMs }),
+    provideDados({
+      fonte: environment.fonteDados,
+      latenciaSimuladaMs: environment.latenciaSimuladaMs,
+    }),
   ],
 };

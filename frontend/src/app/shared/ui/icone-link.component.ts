@@ -12,11 +12,15 @@ const ICONES: Record<Icone, string> = {
   link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7',
 };
 
-/** Link externo com ícone. Abre em nova aba e avisa leitores de tela. */
+/** Link com ícone. Links web abrem em nova aba e avisam leitores de tela. */
 @Component({
   selector: 'app-icone-link',
   template: `
-    <a [href]="url()" target="_blank" rel="noopener noreferrer">
+    <a
+      [href]="url()"
+      [attr.target]="externo() ? '_blank' : null"
+      [attr.rel]="externo() ? 'noopener noreferrer' : null"
+    >
       <svg
         viewBox="0 0 24 24"
         width="20"
@@ -31,7 +35,9 @@ const ICONES: Record<Icone, string> = {
         <path [attr.d]="caminho()" />
       </svg>
       <span>{{ rotulo() }}</span>
-      <span class="sr-only">(abre em nova aba)</span>
+      @if (externo()) {
+        <span class="sr-only">(abre em nova aba)</span>
+      }
     </a>
   `,
   styles: `
@@ -51,4 +57,6 @@ export class IconeLinkComponent {
   readonly icone = input<Icone>('link');
 
   protected readonly caminho = computed(() => ICONES[this.icone()]);
+  /** Links web abrem em nova aba; mailto: e tel: não. */
+  protected readonly externo = computed(() => /^https?:/.test(this.url()));
 }

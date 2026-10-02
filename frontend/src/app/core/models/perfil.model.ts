@@ -6,35 +6,44 @@ export interface Link {
   rotulo: string;
 }
 
+/** 'YYYY' ou 'YYYY-MM' (quando o mês não é conhecido, só o ano). */
+export type DataParcial = string;
+
 export interface Experiencia {
   id: string;
   empresa: string;
   cargo: string;
-  /** ISO 'YYYY-MM'. */
-  inicio: string;
+  inicio: DataParcial;
   /** Ausente = emprego atual. */
-  fim?: string;
+  fim?: DataParcial;
+  /** Ex.: 'Remoto'. */
+  modalidade?: string;
+  /** Uma frase de resumo. */
   descricao: string;
+  /** Principais atividades (os tópicos do currículo). */
+  atividades: string[];
   /** Ids de Skill. */
   tecnologias: string[];
 }
 
 export interface Formacao {
   id: string;
-  instituicao: string;
   curso: string;
-  inicio: string;
-  fim?: string;
+  instituicao: string;
+  inicio?: DataParcial;
+  fim?: DataParcial;
 }
 
 export interface Perfil {
   nome: string;
   titulo: string;
+  localizacao?: string;
   apresentacao: string;
-  objetivos: string;
+  /** Opcional: a seção só aparece quando existir. */
+  objetivos?: string;
   experiencias: Experiencia[];
   formacoes: Formacao[];
   links: Link[];
-  curriculoUrl: string;
-  placeholder?: boolean;
+  /** Ausente = sem currículo para download. */
+  curriculoUrl?: string;
 }

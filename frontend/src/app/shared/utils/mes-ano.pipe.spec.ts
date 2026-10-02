@@ -16,3 +16,9 @@ describe('MesAnoPipe', () => {
     expect(pipe.transform('01/2024', '—')).toBe('—');
   });
 });
+
+describe('MesAnoPipe com só o ano', () => {
+  it('mostra só o ano', () => {
+    expect(new MesAnoPipe().transform('2024')).toBe('2024');
+  });
+});

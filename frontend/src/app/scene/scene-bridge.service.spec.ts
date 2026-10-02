@@ -28,7 +28,7 @@ describe('SceneBridgeService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideDados({ fonte: 'mock' }),
+        provideDados({ fonte: 'local' }),
         SceneBridgeService,
         { provide: SceneEngineService, useClass: MotorFalso },
       ],
@@ -44,12 +44,12 @@ describe('SceneBridgeService', () => {
     it('clicar num livro abre o projeto e vai para a livraria', () => {
       motor.opcoes!.callbacks.aoSelecionar({
         tipo: 'projeto',
-        id: 'projeto-exemplo-3',
+        id: 'nfe-estudo',
         rotulo: '',
       });
 
       expect(estado.areaAtual()).toBe('livraria');
-      expect(estado.projetoSelecionadoId()).toBe('projeto-exemplo-3');
+      expect(estado.projetoSelecionadoId()).toBe('nfe-estudo');
     });
 
     it('clicar num vaso liga e desliga o filtro da skill', () => {
@@ -91,10 +91,10 @@ describe('SceneBridgeService', () => {
     });
 
     it('um filtro vindo de fora (modo simples, Aurora) acende os livros na cena', () => {
-      estado.destacarTecnologia('Kafka');
+      estado.destacarTecnologia('Apache Kafka');
       TestBed.tick();
 
-      expect(motor.livraria.destacar).toHaveBeenLastCalledWith(new Set(['projeto-exemplo-3']));
+      expect(motor.livraria.destacar).toHaveBeenLastCalledWith(new Set(['nfe-estudo']));
       expect(motor.floricultura.selecionar).toHaveBeenLastCalledWith('kafka');
     });
   });
@@ -115,7 +115,7 @@ describe('SceneBridgeService sem conectar (SSR)', () => {
   it('desconectar não toca no motor quando a cena nunca foi conectada', () => {
     TestBed.configureTestingModule({
       providers: [
-        provideDados({ fonte: 'mock' }),
+        provideDados({ fonte: 'local' }),
         SceneBridgeService,
         { provide: SceneEngineService, useClass: MotorFalso },
       ],

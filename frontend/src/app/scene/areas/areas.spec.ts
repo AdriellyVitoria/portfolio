@@ -1,7 +1,7 @@
 import type { MeshStandardMaterial } from 'three';
 
-import { PROJETOS_MOCK } from '../../core/data/mock/projetos.mock';
-import { SKILLS_MOCK } from '../../core/data/mock/skills.mock';
+import { PROJETOS } from '../../core/data/local/projetos.dados';
+import { SKILLS } from '../../core/data/local/skills.dados';
 import { alvoDe } from '../tipos';
 import { CafeArea } from './cafe.area';
 import { FloriculturaArea } from './floricultura.area';
@@ -17,7 +17,7 @@ describe('áreas da cena', () => {
   describe('LivrariaArea', () => {
     const montar = () => {
       const livraria = new LivrariaArea();
-      livraria.montar([...PROJETOS_MOCK]);
+      livraria.montar([...PROJETOS]);
       return livraria;
     };
     const brilho = (livraria: LivrariaArea, id: string) =>
@@ -27,26 +27,26 @@ describe('áreas da cena', () => {
     it('cria um livro clicável por projeto', () => {
       const livraria = montar();
 
-      expect(livraria.alvos).toHaveLength(PROJETOS_MOCK.length);
+      expect(livraria.alvos).toHaveLength(PROJETOS.length);
       const porId = (x: { id: string }, y: { id: string }) => x.id.localeCompare(y.id);
       expect(livraria.alvos.map((m) => alvoDe(m)!).sort(porId)).toEqual(
-        PROJETOS_MOCK.map((p) => ({ tipo: 'projeto', id: p.id, rotulo: p.nome })).sort(porId),
+        PROJETOS.map((p) => ({ tipo: 'projeto', id: p.id, rotulo: p.nome })).sort(porId),
       );
     });
 
     it('acende só os livros destacados', () => {
       const livraria = montar();
 
-      livraria.destacar(new Set(['projeto-exemplo-1']));
+      livraria.destacar(new Set(['assistente-pedidos-ia']));
       for (let i = 0; i < 60; i++) livraria.update(1 / 60, i / 60);
 
-      expect(brilho(livraria, 'projeto-exemplo-1')).toBeGreaterThan(0.7);
-      expect(brilho(livraria, 'projeto-exemplo-4')).toBeLessThan(0.05);
+      expect(brilho(livraria, 'assistente-pedidos-ia')).toBeGreaterThan(0.7);
+      expect(brilho(livraria, 'linketinder')).toBeLessThan(0.05);
     });
 
     it('remontar não duplica livros', () => {
       const livraria = montar();
-      livraria.montar([...PROJETOS_MOCK].slice(0, 2));
+      livraria.montar([...PROJETOS].slice(0, 2));
 
       expect(livraria.alvos).toHaveLength(2);
     });
@@ -54,10 +54,10 @@ describe('áreas da cena', () => {
 
   it('FloriculturaArea cria um vaso clicável por skill', () => {
     const floricultura = new FloriculturaArea();
-    floricultura.montar([...SKILLS_MOCK]);
+    floricultura.montar([...SKILLS]);
 
     const ids = new Set(floricultura.alvos.map((m) => alvoDe(m)?.id));
-    expect(ids).toEqual(new Set(SKILLS_MOCK.map((s) => s.id)));
+    expect(ids).toEqual(new Set(SKILLS.map((s) => s.id)));
     expect(floricultura.grupo.getObjectByName('vaso__java')).toBeDefined();
   });
 

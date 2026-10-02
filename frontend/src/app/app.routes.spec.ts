@@ -11,7 +11,7 @@ describe('rotas do modo simples', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideDados({ fonte: 'mock' }),
+        provideDados({ fonte: 'local' }),
         provideRouter(routes, withComponentInputBinding()),
       ],
     });
@@ -35,20 +35,16 @@ describe('rotas do modo simples', () => {
 
   describe('rota do projeto', () => {
     it('abre o painel do projeto e atualiza estado e título', async () => {
-      const harness = await RouterTestingHarness.create('/simples/projetos/projeto-exemplo-2');
+      const harness = await RouterTestingHarness.create('/simples/projetos/nfe-estudo');
       const el = harness.routeNativeElement!;
 
-      expect(TestBed.inject(PortfolioStateService).projetoSelecionadoId()).toBe(
-        'projeto-exemplo-2',
-      );
-      expect(el.querySelector('dialog .painel__titulo')?.textContent).toContain(
-        'Projeto Exemplo 2',
-      );
-      expect(TestBed.inject(Title).getTitle()).toContain('Projeto Exemplo 2');
+      expect(TestBed.inject(PortfolioStateService).projetoSelecionadoId()).toBe('nfe-estudo');
+      expect(el.querySelector('dialog .painel__titulo')?.textContent).toContain('NF-e Estudo');
+      expect(TestBed.inject(Title).getTitle()).toContain('NF-e Estudo');
     });
 
     it('fechar o painel volta para /simples e limpa a seleção', async () => {
-      const harness = await RouterTestingHarness.create('/simples/projetos/projeto-exemplo-2');
+      const harness = await RouterTestingHarness.create('/simples/projetos/nfe-estudo');
 
       harness.routeNativeElement!.querySelector<HTMLButtonElement>('.painel__fechar')!.click();
       await harness.fixture.whenStable();

@@ -7,7 +7,7 @@ describe('PortfolioStateService', () => {
   let estado: PortfolioStateService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideDados({ fonte: 'mock' })] });
+    TestBed.configureTestingModule({ providers: [provideDados({ fonte: 'local' })] });
     estado = TestBed.inject(PortfolioStateService);
   });
 
@@ -29,8 +29,8 @@ describe('PortfolioStateService', () => {
 
   describe('seleção de projeto', () => {
     it('seleciona e fecha um projeto', () => {
-      expect(estado.selecionarProjeto('projeto-exemplo-2')).toBe(true);
-      expect(estado.projetoSelecionado()?.nome).toBe('Projeto Exemplo 2');
+      expect(estado.selecionarProjeto('nfe-estudo')).toBe(true);
+      expect(estado.projetoSelecionado()?.nome).toBe('NF-e Estudo');
 
       estado.fecharProjeto();
 
@@ -54,7 +54,7 @@ describe('PortfolioStateService', () => {
       const destacados = estado.projetosDestacados();
       expect(destacados.length).toBeGreaterThan(0);
       destacados.forEach((p) => expect(p.tecnologias).toContain('java'));
-      expect(estado.idsProjetosDestacados().has('projeto-exemplo-4')).toBe(false);
+      expect(estado.idsProjetosDestacados().has('portfolio-3d')).toBe(false);
     });
 
     it.each(['java', 'Java', ' JAVA ', 'Spring Boot'])('aceita id ou nome: "%s"', (termo) => {

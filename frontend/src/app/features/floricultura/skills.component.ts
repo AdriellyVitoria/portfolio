@@ -1,16 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import type { CategoriaSkill, Skill } from '../../core/models';
+import { CATEGORIAS_SKILL, type CategoriaSkill, type Skill } from '../../core/models';
 import { PortfolioStateService } from '../../core/state/portfolio-state.service';
 import { TagComponent } from '../../shared/ui/tag.component';
-
-const ROTULOS: Record<CategoriaSkill, string> = {
-  FRONTEND: 'Frontend',
-  BACKEND: 'Backend',
-  BANCO: 'Banco de dados',
-  OUTROS: 'Outros',
-};
 
 interface Prateleira {
   categoria: CategoriaSkill;
@@ -36,11 +29,11 @@ export class SkillsComponent {
   protected readonly estado = inject(PortfolioStateService);
 
   protected readonly prateleiras = computed<Prateleira[]>(() =>
-    (Object.keys(ROTULOS) as CategoriaSkill[]).map((categoria) => ({
-      categoria,
-      rotulo: ROTULOS[categoria],
-      skills: this.estado.skills().filter((s) => s.categoria === categoria),
-    })),
+    CATEGORIAS_SKILL.map(({ id, rotulo }) => ({
+      categoria: id,
+      rotulo,
+      skills: this.estado.skills().filter((s) => s.categoria === id),
+    })).filter((p) => p.skills.length),
   );
 
   protected readonly totalPorSkill = computed(() => {

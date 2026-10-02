@@ -5,7 +5,7 @@ import type { FonteDados } from '../app/core/data/provide-dados';
 export interface Environment {
   producao: boolean;
   fonteDados: FonteDados;
-  /** Atraso artificial dos mocks (ms), para ver os estados de carregamento. */
-  latenciaMockMs: number;
+  /** Atraso artificial dos dados locais (ms), para ver os estados de carregamento. */
+  latenciaSimuladaMs: number;
   apiUrl: string;
 }

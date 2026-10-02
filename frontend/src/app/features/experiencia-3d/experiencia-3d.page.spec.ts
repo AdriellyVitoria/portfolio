@@ -15,7 +15,7 @@ describe('Experiencia3dPage', () => {
   async function renderizar() {
     TestBed.configureTestingModule({
       imports: [Experiencia3dPage],
-      providers: [provideDados({ fonte: 'mock' }), provideRouter([])],
+      providers: [provideDados({ fonte: 'local' }), provideRouter([])],
     });
     const fixture = TestBed.createComponent(Experiencia3dPage);
     await fixture.whenStable();
@@ -49,10 +49,10 @@ describe('Experiencia3dPage', () => {
 
     botao('Livraria').click();
     await fixture.whenStable();
-    botao('Projeto Exemplo 2').click();
+    botao('NF-e Estudo').click();
     await fixture.whenStable();
 
-    expect(el.querySelector('dialog .painel__titulo')?.textContent).toContain('Projeto Exemplo 2');
+    expect(el.querySelector('dialog .painel__titulo')?.textContent).toContain('NF-e Estudo');
   });
 
   it('no café, a pasta abre contato e currículo', async () => {

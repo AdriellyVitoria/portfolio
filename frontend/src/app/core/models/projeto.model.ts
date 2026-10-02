@@ -14,8 +14,6 @@ export interface Projeto {
   ordem: number;
   /** Nome de cor da paleta (ex.: 'terracota'), usado para gerar o livro 3D. */
   corCapa?: string;
-  /** Só nos dados de exemplo. */
-  placeholder?: boolean;
 }
 
 export interface FiltroProjetos {

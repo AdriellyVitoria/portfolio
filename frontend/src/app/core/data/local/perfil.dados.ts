@@ -1,0 +1,97 @@
+import type { Perfil } from '../../models';
+
+// Fonte: currículo (out/2026). LinkedIn: link usado nos READMEs do GitHub.
+export const PERFIL: Perfil = {
+  nome: 'Adrielly Vitória',
+  titulo: 'Desenvolvedora Full Stack',
+  localizacao: 'Patos, Paraíba, Brasil',
+  apresentacao:
+    'Desenvolvedora Full Stack com experiência em Java, Spring Boot, APIs REST, microserviços, Kafka e PostgreSQL, atuando também com Angular e Vue.js. Conhecimentos em Quarkus, CI/CD e desenvolvimento assistido por IA, utilizando ferramentas como Claude, GitHub Copilot e Codex. Experiência com desenvolvimento, integração entre serviços, testes e evolução de aplicações.',
+  experiencias: [
+    {
+      id: 'zg-solucoes',
+      empresa: 'ZG Soluções',
+      cargo: 'Desenvolvedora Full Stack',
+      inicio: '2024',
+      modalidade: 'Remoto',
+      descricao: 'Desenvolvimento full stack do sistema ZGT, em arquitetura de microserviços.',
+      atividades: [
+        'Desenvolvimento e manutenção de funcionalidades do sistema ZGT utilizando Java e Angular.',
+        'Desenvolvimento e consumo de APIs REST, atuando na integração entre serviços.',
+        'Processamento de arquivos XML de faturamento hospitalar, realizando leitura, extração e validação de informações para posterior persistência em banco de dados.',
+        'Atuação em ambiente de arquitetura de microserviços, com integração assíncrona utilizando Apache Kafka e utilização de Redis para cache.',
+        'Desenvolvimento de funcionalidades utilizando Angular, TypeScript e Angular Material.',
+        'Utilização e evolução de componentes do ZG Design System, seguindo padrões visuais e técnicos da aplicação.',
+        'Modelagem e manutenção de estruturas em bancos de dados relacionais e SQL.',
+        'Criação e manutenção de testes unitários e de integração.',
+        'Participação em processos de CI/CD, utilizando Bitbucket Pipelines e Jenkins.',
+        'Utilização de ferramentas de Inteligência Artificial como apoio ao desenvolvimento, análise de código, investigação de problemas e elaboração de soluções.',
+        'Experiência com ferramentas de IA para desenvolvimento assistido, incluindo Claude, GitHub Copilot e Codex, além de utilização de agentes de IA em fluxos de desenvolvimento.',
+        'Participação nas cerimônias e processos de desenvolvimento utilizando Scrum e Kanban.',
+      ],
+      tecnologias: [
+        'java',
+        'angular',
+        'typescript',
+        'angular-material',
+        'apis-rest',
+        'kafka',
+        'redis',
+        'sql',
+        'microservicos',
+        'design-system',
+        'testes',
+        'bitbucket-pipelines',
+        'jenkins',
+        'claude',
+        'github-copilot',
+        'codex',
+        'agentes-ia',
+        'scrum',
+        'kanban',
+      ],
+    },
+    {
+      id: 'oracle-alura-one',
+      empresa: 'Oracle + Alura — ONE',
+      cargo: 'Desenvolvedora Java',
+      inicio: '2021',
+      fim: '2023',
+      modalidade: 'Remoto',
+      descricao: 'Desenvolvimento de aplicações Java no programa Oracle Next Education.',
+      atividades: [
+        'Desenvolvimento de aplicações utilizando Java, com foco em Programação Orientada a Objetos, Spring e Servlets.',
+        'Desenvolvimento e manipulação de dados utilizando SQL.',
+        'Aplicação de conceitos de backend e desenvolvimento de APIs durante projetos e atividades práticas.',
+        'Participação em atividades de desenvolvimento e revisão técnica, apoiando outros participantes em Java, Spring e SQL.',
+      ],
+      tecnologias: ['java', 'sql', 'apis-rest'],
+    },
+  ],
+  formacoes: [
+    {
+      id: 'ads-centro-universitario-patos',
+      curso: 'Análise e Desenvolvimento de Sistemas',
+      instituicao: 'Centro Universitário de Patos',
+    },
+    {
+      id: 'acelerar-zg',
+      curso: 'Acelerar ZG',
+      instituicao: 'Programa de capacitação',
+    },
+  ],
+  links: [
+    {
+      tipo: 'LINKEDIN',
+      url: 'https://www.linkedin.com/in/adriellymendes-dev/',
+      rotulo: 'LinkedIn',
+    },
+    { tipo: 'GITHUB', url: 'https://github.com/AdriellyVitoria', rotulo: 'GitHub' },
+    {
+      tipo: 'EMAIL',
+      url: 'mailto:mendes.silva.vitoria.adrielly@gmail.com',
+      rotulo: 'mendes.silva.vitoria.adrielly@gmail.com',
+    },
+  ],
+  curriculoUrl: '/curriculo/curriculo-adrielly-vitoria.pdf',
+};

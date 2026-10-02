@@ -9,7 +9,7 @@ describe('ListaProjetosComponent', () => {
   async function renderizar() {
     TestBed.configureTestingModule({
       imports: [ListaProjetosComponent],
-      providers: [provideDados({ fonte: 'mock' }), provideRouter([])],
+      providers: [provideDados({ fonte: 'local' }), provideRouter([])],
     });
     const fixture = TestBed.createComponent(ListaProjetosComponent);
     await fixture.whenStable();
@@ -25,20 +25,20 @@ describe('ListaProjetosComponent', () => {
   it('mostra todos os projetos sem filtro', async () => {
     const { cards, botao } = await renderizar();
 
-    expect(cards().length).toBe(5);
+    expect(cards().length).toBe(6);
     expect(botao('Todas').getAttribute('aria-pressed')).toBe('true');
   });
 
   it('filtra pela tecnologia escolhida e atualiza o estado compartilhado', async () => {
     const { fixture, el, botao, cards, estado } = await renderizar();
 
-    botao('Kafka').click();
+    botao('Apache Kafka').click();
     await fixture.whenStable();
 
     expect(estado.filtroTecnologia()).toBe('kafka');
     expect(cards().length).toBe(1);
-    expect(botao('Kafka').getAttribute('aria-pressed')).toBe('true');
-    expect(el.querySelector('.resumo')?.textContent).toContain('1 projeto com Kafka');
+    expect(botao('Apache Kafka').getAttribute('aria-pressed')).toBe('true');
+    expect(el.querySelector('.resumo')?.textContent).toContain('1 projeto com Apache Kafka');
   });
 
   it('clicar de novo na tecnologia ativa limpa o filtro', async () => {
@@ -50,7 +50,7 @@ describe('ListaProjetosComponent', () => {
     await fixture.whenStable();
 
     expect(estado.filtroTecnologia()).toBeNull();
-    expect(cards().length).toBe(5);
+    expect(cards().length).toBe(6);
   });
 
   it('reage a filtros vindos de fora (ex.: floricultura ou Aurora)', async () => {
@@ -66,6 +66,6 @@ describe('ListaProjetosComponent', () => {
     const { el } = await renderizar();
 
     const link = el.querySelector<HTMLAnchorElement>('.card__link');
-    expect(link?.getAttribute('href')).toBe('/simples/projetos/projeto-exemplo-1');
+    expect(link?.getAttribute('href')).toBe('/simples/projetos/assistente-pedidos-ia');
   });
 });

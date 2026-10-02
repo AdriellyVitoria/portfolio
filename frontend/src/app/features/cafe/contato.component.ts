@@ -21,10 +21,8 @@ const ICONE_POR_LINK: Record<TipoLink, Icone> = {
         <li><app-icone-link [url]="link.url" [rotulo]="link.rotulo" [icone]="link.icone" /></li>
       }
     </ul>
-    @if (perfil().placeholder) {
-      <p class="aviso">Currículo em PDF em breve.</p>
-    } @else {
-      <a app-botao [href]="perfil().curriculoUrl" download>Baixar currículo (PDF)</a>
+    @if (perfil().curriculoUrl; as curriculo) {
+      <a app-botao [href]="curriculo" download>Baixar currículo (PDF)</a>
     }
   `,
   styles: `
@@ -41,9 +39,9 @@ const ICONE_POR_LINK: Record<TipoLink, Icone> = {
       padding: 0;
       list-style: none;
     }
-    .aviso {
-      color: var(--texto-suave);
-      font-style: italic;
+    li {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

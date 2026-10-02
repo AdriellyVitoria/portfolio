@@ -12,6 +12,19 @@
   @include a-partir-de($bp-md) {
     grid-template-columns: 1fr 1fr;
   }
+
+  &--unica {
+    max-width: 46rem;
+
+    @include a-partir-de($bp-md) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.local {
+  color: var(--texto-suave);
+  font-size: var(--texto-sm);
 }
 
 .bloco {
@@ -61,6 +74,14 @@
   &__titulo {
     font-family: var(--fonte-texto);
     font-size: var(--texto-lg);
+  }
+
+  &__atividades {
+    display: grid;
+    gap: var(--esp-1);
+    margin: 0;
+    padding-left: var(--esp-6);
+    color: var(--texto-suave);
   }
 
   &__tags {
