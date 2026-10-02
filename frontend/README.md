@@ -31,5 +31,3 @@ Regras de dependência garantidas pelo ESLint (`eslint-plugin-boundaries`):
 - `shared` → `shared`
 
 Estilos globais ficam em `src/styles/`. Componentes usam `@use 'mixins' as *;`; `_tokens.scss` só é importado em `styles.scss`, porque gera CSS.
-
-Detalhes no [plano](../plano.md).

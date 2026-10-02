@@ -2,7 +2,7 @@
 
 Portfólio pessoal interativo em 3D de **Adrielly**, desenvolvedora Full Stack.
 
-> 🚧 Em construção. Planejamento completo em [plano.md](plano.md).
+> 🚧 Em construção.
 
 ## Estrutura
 

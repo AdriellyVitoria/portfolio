@@ -10,3 +10,8 @@ desktop.ini
 # Segredos (nunca versionar chaves, ex.: Gemini)
 .env
 .env.*
+
+# Documentos pessoais de planejamento (ficam só na máquina)
+plano.md
+context*.md
+checklist.md
