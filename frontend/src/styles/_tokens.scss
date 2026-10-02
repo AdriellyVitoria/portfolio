@@ -1,0 +1,94 @@
+// Design tokens — paleta de outono.
+// Cores e medidas ficam como CSS custom properties (mudam em runtime e podem ser
+// lidas pela cena 3D via getComputedStyle). Breakpoints ficam em SCSS porque
+// media queries não aceitam custom properties.
+// Este arquivo gera CSS: importe só em styles.scss, nunca em componentes.
+
+@use 'breakpoints' as *;
+
+:root {
+  // --- Paleta base ---
+  --cor-terracota: #b85a3c;
+  --cor-terracota-forte: #a44d32; // contraste AA com creme para texto/botões
+  --cor-laranja: #d9772b;
+  --cor-amarelo: #e8b54a;
+  --cor-verde: #5f7a4a;
+  --cor-verde-escuro: #3f5634;
+  --cor-marrom: #6b4430;
+  --cor-marrom-escuro: #3b261b;
+  --cor-creme: #f6ecdb;
+  --cor-creme-claro: #fbf6ee;
+  --cor-rosa: #d99a9e;
+  --cor-lilas: #a58cb3;
+
+  // --- Tokens semânticos (componentes usam estes, não a paleta base) ---
+  --fundo: var(--cor-creme-claro);
+  --superficie: #fffdf9;
+  --superficie-alt: var(--cor-creme);
+  --texto: var(--cor-marrom-escuro);
+  --texto-suave: #6a5446;
+  --borda: #e3d3bd;
+  --acao: var(--cor-terracota-forte);
+  --acao-texto: var(--cor-creme-claro);
+  --acao-hover: #8f412a;
+  --destaque: var(--cor-amarelo);
+  --foco: var(--cor-lilas);
+
+  // --- Tipografia ---
+  --fonte-titulo: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --fonte-texto: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --texto-xs: 0.75rem;
+  --texto-sm: 0.875rem;
+  --texto-md: 1rem;
+  --texto-lg: 1.125rem;
+  --texto-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --texto-2xl: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  --texto-3xl: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+
+  --altura-linha: 1.6;
+  --altura-linha-titulo: 1.15;
+
+  // --- Espaçamentos (escala de 4px) ---
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-6: 1.5rem;
+  --esp-8: 2rem;
+  --esp-12: 3rem;
+  --esp-16: 4rem;
+
+  --gutter: var(--esp-4);
+  --largura-conteudo: 72rem;
+
+  // --- Formas e profundidade ---
+  --raio-sm: 6px;
+  --raio-md: 12px;
+  --raio-lg: 20px;
+  --raio-pill: 999px;
+
+  --sombra-sm: 0 1px 2px rgb(59 38 27 / 8%);
+  --sombra-md: 0 4px 14px rgb(59 38 27 / 10%);
+  --sombra-lg: 0 12px 32px rgb(59 38 27 / 14%);
+
+  // --- Movimento ---
+  --duracao-rapida: 150ms;
+  --duracao-media: 280ms;
+  --duracao-lenta: 600ms;
+  --easing-padrao: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: $bp-md) {
+  :root {
+    --gutter: var(--esp-8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duracao-rapida: 0ms;
+    --duracao-media: 0ms;
+    --duracao-lenta: 0ms;
+  }
+}

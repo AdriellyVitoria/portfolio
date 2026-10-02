@@ -1,0 +1,65 @@
+@use 'mixins' as *;
+
+.pagina {
+  display: grid;
+  gap: var(--esp-12);
+  max-width: var(--largura-conteudo);
+  margin-inline: auto;
+  padding: var(--esp-16) var(--gutter);
+}
+
+.hero {
+  display: grid;
+  gap: var(--esp-2);
+
+  &__sobretitulo {
+    color: var(--cor-verde-escuro);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  &__titulo {
+    font-size: var(--texto-3xl);
+    color: var(--acao);
+  }
+
+  &__subtitulo {
+    font-size: var(--texto-xl);
+    color: var(--texto-suave);
+  }
+}
+
+.aviso {
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-6);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-md);
+
+  &__titulo {
+    font-size: var(--texto-2xl);
+  }
+}
+
+.paleta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--esp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include a-partir-de($bp-md) {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  &__cor {
+    aspect-ratio: 1;
+    border-radius: var(--raio-md);
+    box-shadow: var(--sombra-sm);
+  }
+}

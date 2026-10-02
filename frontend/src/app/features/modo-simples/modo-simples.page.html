@@ -1,0 +1,20 @@
+<main class="pagina">
+  <header class="hero">
+    <p class="hero__sobretitulo">Café · Livraria · Floricultura</p>
+    <h1 class="hero__titulo">Adrielly</h1>
+    <p class="hero__subtitulo">Desenvolvedora Full Stack</p>
+  </header>
+
+  <section class="aviso" aria-labelledby="aviso-titulo">
+    <h2 id="aviso-titulo" class="aviso__titulo">Preparando o café…</h2>
+    <p>Este portfólio está em construção. Volte em breve!</p>
+  </section>
+
+  <ul class="paleta" aria-label="Paleta de cores do projeto">
+    @for (cor of paleta; track cor) {
+      <li class="paleta__cor" [style.background]="'var(--cor-' + cor + ')'">
+        <span class="sr-only">{{ cor }}</span>
+      </li>
+    }
+  </ul>
+</main>
