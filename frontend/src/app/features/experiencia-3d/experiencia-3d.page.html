@@ -1,0 +1,138 @@
+<canvas
+  #canvas
+  class="cena"
+  role="img"
+  aria-label="Cena 3D de um café, livraria e floricultura de outono. Use o menu de estações para navegar."
+></canvas>
+
+<header class="topo">
+  <a class="topo__marca" routerLink="/simples">{{ perfil()?.nome ?? 'Portfólio' }}</a>
+  <a class="topo__link" routerLink="/simples">Versão simples</a>
+</header>
+
+@if (semWebGL()) {
+  <div class="aviso-tela">
+    <p class="aviso-tela__titulo">Seu navegador não conseguiu abrir a experiência 3D.</p>
+    <a class="aviso-tela__link" routerLink="/simples">Ver a versão simples do portfólio</a>
+  </div>
+} @else if (!ponte.pronto()) {
+  <div class="aviso-tela" aria-live="polite">
+    <span class="xicara" aria-hidden="true"></span>
+    <p class="aviso-tela__titulo">Preparando o café…</p>
+  </div>
+}
+
+@if (ponte.dicaCursor(); as dica) {
+  <div class="dica-cursor" aria-hidden="true" [style.left.px]="dica.x" [style.top.px]="dica.y">
+    {{ dica.rotulo }}
+  </div>
+}
+
+<section class="hud" aria-label="Navegação da experiência 3D">
+  <div class="hud__estacao">
+    <p class="hud__dica" aria-live="polite">{{ estacaoAtual().dica }}</p>
+
+    @switch (estado.areaAtual()) {
+      @case ('livraria') {
+        <ul class="hud__itens" aria-label="Projetos">
+          @for (projeto of projetosOrdenados(); track projeto.id) {
+            <li>
+              <button
+                type="button"
+                app-tag
+                [tom]="projeto.destaque ? 'destaque' : 'neutro'"
+                [ativa]="estado.idsProjetosDestacados().has(projeto.id)"
+                (click)="abrirProjeto(projeto.id)"
+              >
+                {{ projeto.nome }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+      @case ('floricultura') {
+        <ul class="hud__itens" aria-label="Skills">
+          @for (skill of estado.skills(); track skill.id) {
+            <li>
+              <button
+                type="button"
+                app-tag
+                [tom]="skill.destaque ? 'destaque' : 'neutro'"
+                [ativa]="estado.filtroTecnologia() === skill.id"
+                [attr.aria-pressed]="estado.filtroTecnologia() === skill.id"
+                (click)="estado.alternarTecnologia(skill.id)"
+              >
+                {{ skill.nome }}
+              </button>
+            </li>
+          }
+        </ul>
+        @if (estado.skillFiltrada(); as skill) {
+          <p class="hud__resumo">
+            {{ skill.nome }}: {{ estado.projetosDestacados().length }}
+            {{ estado.projetosDestacados().length === 1 ? 'projeto' : 'projetos' }}
+            @if (estado.projetosDestacados().length) {
+              <button type="button" class="hud__acao" (click)="verNaLivraria()">
+                Ver na livraria
+              </button>
+            }
+          </p>
+        }
+      }
+      @case ('cafe') {
+        <ul class="hud__itens" aria-label="Objetos da mesa">
+          @for (item of itensCafe; track item.id) {
+            <li>
+              <button
+                type="button"
+                app-tag
+                [ativa]="estado.painelCafe() === item.id"
+                (click)="estado.abrirPainelCafe(item.id)"
+              >
+                {{ item.rotulo }} · {{ item.titulo }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+
+  <nav class="hud__menu" aria-label="Estações">
+    @for (estacao of estacoes; track estacao.area) {
+      <button
+        type="button"
+        class="hud__botao"
+        [class.hud__botao--ativo]="estado.areaAtual() === estacao.area"
+        [attr.aria-current]="estado.areaAtual() === estacao.area ? 'location' : null"
+        (click)="estado.irPara(estacao.area)"
+      >
+        {{ estacao.rotulo }}
+      </button>
+    }
+  </nav>
+</section>
+
+@if (estado.projetoSelecionado(); as projeto) {
+  <app-painel [titulo]="projeto.nome" (fechar)="estado.fecharProjeto()">
+    <app-painel-projeto [projeto]="projeto" [tecnologias]="estado.skillsDe(projeto.tecnologias)" />
+  </app-painel>
+}
+
+@if (estado.painelCafe(); as painel) {
+  @if (perfil(); as p) {
+    <app-painel [titulo]="tituloPainelCafe()" (fechar)="estado.fecharPainelCafe()">
+      @switch (painel) {
+        @case ('apresentacao') {
+          <app-sobre [perfil]="p" mostrar="apresentacao" />
+        }
+        @case ('trajetoria') {
+          <app-sobre [perfil]="p" mostrar="trajetoria" />
+        }
+        @case ('contato') {
+          <app-contato [perfil]="p" />
+        }
+      }
+    </app-painel>
+  }
+}

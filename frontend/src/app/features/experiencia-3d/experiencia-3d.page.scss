@@ -1,0 +1,230 @@
+@use 'mixins' as *;
+
+:host {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #f2d4b0;
+}
+
+.cena {
+  width: 100%;
+  height: 100%;
+  touch-action: none; // o arrasto gira a câmera em vez de rolar a página
+  cursor: grab;
+}
+
+// Vidro fosco quente para tudo que fica por cima da cena.
+%vidro {
+  border: 1px solid rgb(255 255 255 / 50%);
+  background: rgb(251 246 238 / 82%);
+  box-shadow: var(--sombra-md);
+  backdrop-filter: blur(10px);
+}
+
+.topo {
+  position: absolute;
+  inset: var(--esp-4) var(--esp-4) auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+
+  > a {
+    @extend %vidro;
+
+    padding: var(--esp-2) var(--esp-4);
+    border-radius: var(--raio-pill);
+    pointer-events: auto;
+    text-decoration: none;
+  }
+
+  &__marca {
+    color: var(--acao);
+    font-family: var(--fonte-titulo);
+    font-size: var(--texto-lg);
+    font-weight: 600;
+  }
+
+  &__link {
+    color: var(--texto);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+  }
+}
+
+.hud {
+  position: absolute;
+  inset: auto var(--esp-3) var(--esp-3);
+  display: grid;
+  justify-items: center;
+  gap: var(--esp-3);
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  &__estacao {
+    @extend %vidro;
+
+    display: grid;
+    gap: var(--esp-2);
+    width: min(100%, 46rem);
+    padding: var(--esp-3) var(--esp-4);
+    border-radius: var(--raio-lg);
+  }
+
+  &__dica {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+
+  &__itens {
+    display: flex;
+    gap: var(--esp-2);
+    margin: 0;
+    padding: 0 0 var(--esp-1);
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: thin;
+  }
+
+  &__resumo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-2);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+  }
+
+  &__acao {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--acao);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  &__menu {
+    @extend %vidro;
+
+    display: flex;
+    max-width: 100%;
+    padding: var(--esp-1);
+    border-radius: var(--raio-pill);
+    overflow-x: auto;
+  }
+
+  &__botao {
+    min-height: 44px;
+    padding: var(--esp-2) var(--esp-4);
+    border: none;
+    border-radius: var(--raio-pill);
+    background: transparent;
+    color: var(--texto);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--superficie-alt);
+    }
+
+    &--ativo,
+    &--ativo:hover {
+      background: var(--acao);
+      color: var(--acao-texto);
+    }
+
+    @include a-partir-de($bp-md) {
+      padding-inline: var(--esp-6);
+    }
+  }
+}
+
+.dica-cursor {
+  position: fixed;
+  z-index: 3;
+  padding: var(--esp-1) var(--esp-3);
+  border-radius: var(--raio-pill);
+  background: var(--cor-marrom-escuro);
+  color: var(--cor-creme);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  pointer-events: none;
+  transform: translate(14px, 14px);
+}
+
+.aviso-tela {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--esp-4);
+  padding: var(--gutter);
+  background: var(--fundo);
+  text-align: center;
+
+  &__titulo {
+    font-family: var(--fonte-titulo);
+    font-size: var(--texto-xl);
+  }
+
+  &__link {
+    font-weight: 600;
+  }
+}
+
+// Xícara com vapor, só em CSS.
+.xicara {
+  position: relative;
+  width: 44px;
+  height: 34px;
+  border-radius: 0 0 14px 14px;
+  background: var(--acao);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: -12px;
+    width: 12px;
+    height: 14px;
+    border: 4px solid var(--acao);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 40px;
+    left: 16px;
+    width: 8px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--borda);
+    animation: vapor 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes vapor {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scaleX(0.8);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scaleX(1.2);
+  }
+}
