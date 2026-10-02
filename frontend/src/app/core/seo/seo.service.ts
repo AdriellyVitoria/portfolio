@@ -7,8 +7,9 @@ export interface DadosSeo {
 }
 
 export const SEO_PADRAO: DadosSeo = {
-  titulo: 'Adrielly — Portfólio',
-  descricao: 'Portfólio de Adrielly, desenvolvedora Full Stack (Angular, Java e Spring Boot).',
+  titulo: 'Adrielly Vitória — Desenvolvedora Full Stack',
+  descricao:
+    'Portfólio de Adrielly Vitória, desenvolvedora Full Stack: Java, Spring Boot, APIs REST, microserviços, Kafka, PostgreSQL e Angular.',
 };
 
 /** Título, descrição e Open Graph. Roda também no prerender, então vai para o HTML estático. */
