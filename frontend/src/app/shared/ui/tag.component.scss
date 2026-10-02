@@ -1,0 +1,41 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  padding: var(--esp-1) var(--esp-3);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pill);
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+:host(.tag--destaque) {
+  border-color: var(--cor-amarelo);
+  background: #fbefd2;
+}
+
+:host(button) {
+  min-height: 36px;
+  cursor: pointer;
+  transition:
+    background-color var(--duracao-rapida) var(--easing-padrao),
+    border-color var(--duracao-rapida) var(--easing-padrao);
+
+  &:hover {
+    border-color: var(--cor-terracota);
+  }
+}
+
+:host(.tag--ativa) {
+  border-color: var(--acao);
+  background: var(--acao);
+  color: var(--acao-texto);
+
+  &:hover {
+    border-color: var(--acao-hover);
+    background: var(--acao-hover);
+  }
+}

@@ -1,0 +1,72 @@
+@use 'mixins' as *;
+
+.painel {
+  width: 100%;
+  max-width: 100%;
+  max-height: 90dvh;
+  margin: auto auto 0; // mobile: folha que sobe do rodapé
+  padding: 0;
+  border: none;
+  border-radius: var(--raio-lg) var(--raio-lg) 0 0;
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra-lg);
+
+  &::backdrop {
+    background: rgb(59 38 27 / 45%);
+  }
+
+  &[open] {
+    animation: subir var(--duracao-media) var(--easing-padrao);
+  }
+
+  @include a-partir-de($bp-md) {
+    max-width: 40rem;
+    margin: auto;
+    border-radius: var(--raio-lg);
+  }
+
+  &__conteudo {
+    display: grid;
+    gap: var(--esp-4);
+    padding: var(--esp-6);
+  }
+
+  &__cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--esp-4);
+  }
+
+  &__titulo {
+    font-size: var(--texto-2xl);
+  }
+
+  &__fechar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--raio-pill);
+    background: var(--superficie-alt);
+    color: var(--texto);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--borda);
+    }
+
+    @include foco-visivel;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}

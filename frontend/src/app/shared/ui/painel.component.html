@@ -1,0 +1,30 @@
+<!-- Esc é tratado nativamente pelo <dialog>; o clique aqui é só no fundo escurecido. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<dialog
+  #dialogo
+  class="painel"
+  [attr.aria-labelledby]="idTitulo"
+  (close)="fechar.emit()"
+  (click)="aoClicar($event)"
+>
+  <div class="painel__conteudo">
+    <header class="painel__cabecalho">
+      <h2 class="painel__titulo" [id]="idTitulo">{{ titulo() }}</h2>
+      <button type="button" class="painel__fechar" aria-label="Fechar" (click)="fecharDialogo()">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </header>
+    <ng-content />
+  </div>
+</dialog>
