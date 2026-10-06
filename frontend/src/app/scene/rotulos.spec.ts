@@ -38,6 +38,16 @@ describe('RotulosCena', () => {
     );
   });
 
+  it('alinhamento de lado: encosta pela borda, centralizado na vertical', () => {
+    const aDireita = montar(ancora({ alinhamento: 'direita' }));
+    const aEsquerda = montar(ancora({ alinhamento: 'esquerda' }));
+
+    expect(aDireita.style.transform).toContain('translate(-100%, -50%)');
+    expect(aDireita.style.transformOrigin).toBe('100% 50%');
+    expect(aEsquerda.style.transform).toContain('translate(0, -50%)');
+    expect(aEsquerda.style.transformOrigin).toBe('0 50%');
+  });
+
   it('encolhe com a distância', () => {
     const perto = montar(ancora({ posicao: new Vector3(0, 0, -5) }));
     const longe = montar(ancora({ posicao: new Vector3(0, 0, -10) }));

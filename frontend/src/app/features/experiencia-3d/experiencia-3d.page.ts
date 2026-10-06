@@ -23,10 +23,14 @@ import {
 } from '../../core/models';
 import { SEO_PADRAO, SeoService } from '../../core/seo/seo.service';
 import { PortfolioStateService } from '../../core/state/portfolio-state.service';
+import { disporCanteiros } from '../../scene/areas/floricultura.layout';
 import { suportaWebGL } from '../../scene/qualidade';
 import { SceneBridgeService } from '../../scene/scene-bridge.service';
 import { SceneEngineService } from '../../scene/scene-engine.service';
-import { EtiquetaSkillComponent } from '../../shared/ui/etiqueta-skill.component';
+import {
+  EtiquetaSkillComponent,
+  type PonteiroEtiqueta,
+} from '../../shared/ui/etiqueta-skill.component';
 import type { IconeCafe } from '../../shared/ui/icone-cafe.component';
 import { PainelComponent } from '../../shared/ui/painel.component';
 import { PlacaFachadaComponent } from '../../shared/ui/placa-fachada.component';
@@ -144,16 +148,28 @@ export default class Experiencia3dPage {
       total: this.estado.skills().filter((s) => s.categoria === c.id).length,
     })).filter((c) => c.total),
   );
-  /** Etiquetas dos vasos: categoria + nomes das skills. */
-  protected readonly categoriasEtiquetas = computed(() =>
-    this.categorias().map((c) => ({
+  /**
+   * Etiquetas dos vasos: categoria + nomes das skills. Nas estantes a etiqueta fica do
+   * lado de fora e aponta para o vaso; a do vaso central fica em cima.
+   */
+  protected readonly categoriasEtiquetas = computed(() => {
+    const lados = new Map(
+      disporCanteiros(this.categorias().map((c) => c.id)).map((p) => [p.categoria, p.lado]),
+    );
+    const ponteiro: Record<string, PonteiroEtiqueta> = {
+      esquerda: 'direita',
+      direita: 'esquerda',
+      centro: 'baixo',
+    };
+    return this.categorias().map((c) => ({
       ...c,
+      ponteiro: ponteiro[lados.get(c.id) ?? 'centro'],
       nomes: this.estado
         .skills()
         .filter((s) => s.categoria === c.id)
         .map((s) => s.nome),
-    })),
-  );
+    }));
+  });
   protected readonly categoriaAtual = computed(() =>
     CATEGORIAS_SKILL.find((c) => c.id === this.estado.categoriaSkill()),
   );

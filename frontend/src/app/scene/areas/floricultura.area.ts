@@ -18,6 +18,12 @@ import {
 import { CATEGORIAS_SKILL, type CategoriaSkill, type Skill } from '../../core/models';
 import { PALETA } from '../paleta';
 import type { AncoraRotulo } from '../rotulos';
+import {
+  ESTANTE,
+  type PosicaoCanteiro,
+  andaresDaEstante,
+  disporCanteiros,
+} from './floricultura.layout';
 import type { ParteCena } from '../tipos';
 import {
   caixa,
@@ -28,16 +34,11 @@ import {
   materialFosco,
 } from '../util';
 
-// Os vasos ficam num arco aberto, voltado para quem chega (centro, raio e ângulos do arco).
-const CENTRO_ARCO = new Vector3(0, 0, -1.9);
-const RAIO_ARCO = 2.5;
-const ANGULO_INICIAL = MathUtils.degToRad(196);
-const ANGULO_FINAL = MathUtils.degToRad(344);
-/** Para onde vasos e placas olham (a câmera da estação fica por aí). */
+/** Para onde os vasos olham (a câmera da estação fica por aí). */
 const OLHAR_PARA = new Vector3(0, 0, 3);
 
-/** Onde a etiqueta de skills (HTML) encosta: logo acima das flores. */
-const ALTURA_ETIQUETA = 1.0;
+/** Altura da planta (vaso + flores) com escala 1: usada para cliques e etiquetas. */
+const ALTURA_PLANTA = 0.95;
 /** Estações internas: de onde as placas de seção podem ser vistas. */
 const AREAS_INTERNAS = ['livraria', 'floricultura', 'cafe', 'aurora'] as const;
 
@@ -63,14 +64,13 @@ interface Materiais {
   invisivel: MeshStandardMaterial;
 }
 
-interface Canteiro {
-  categoria: CategoriaSkill;
-  base: Vector3;
-}
+type Canteiro = PosicaoCanteiro;
 
 /**
- * Floricultura: um vaso florido por categoria de skills. As etiquetas com as tecnologias
- * são HTML preso a cada vaso (ver ancoras()). Tocar num vaso escolhe a categoria.
+ * Floricultura: um vaso florido por categoria de skills, em duas estantes de plantas
+ * (uma de cada lado) e um vaso maior no centro, em destaque. As etiquetas com as
+ * tecnologias são HTML preso ao lado de cada vaso (ver ancoras()).
+ * Tocar num vaso escolhe a categoria.
  * Tudo que é estático é fundido por material; a categoria escolhida ganha halo e luz.
  */
 export class FloriculturaArea implements ParteCena {
@@ -139,18 +139,13 @@ export class FloriculturaArea implements ParteCena {
       invisivel: new MeshStandardMaterial({ visible: false }),
     };
 
-    categorias.forEach((categoria, i) => {
-      const t = categorias.length === 1 ? 0.5 : i / (categorias.length - 1);
-      const angulo = MathUtils.lerp(ANGULO_INICIAL, ANGULO_FINAL, t);
-      // Caixotes um pouco mais altos no meio do arco: dá ritmo, como numa vitrine.
-      const elevacao = Math.round(Math.sin(Math.PI * t) * 0.32 * 20) / 20;
-      const base = new Vector3(
-        CENTRO_ARCO.x + Math.cos(angulo) * RAIO_ARCO,
-        elevacao,
-        CENTRO_ARCO.z + Math.sin(angulo) * RAIO_ARCO,
-      );
-      this.montarCanteiro(categoria.id, categoria.rotulo, base, materiais);
-    });
+    const posicoes = disporCanteiros(categorias.map((c) => c.id));
+    this.montarEstantes(andaresDaEstante(posicoes), materiais);
+    for (const posicao of posicoes) {
+      const rotulo =
+        categorias.find((c) => c.id === posicao.categoria)?.rotulo ?? posicao.categoria;
+      this.montarCanteiro(posicao, rotulo, materiais);
+    }
 
     fundirEstaticos(this.estatico);
   }
@@ -163,18 +158,37 @@ export class FloriculturaArea implements ParteCena {
     return [
       {
         id: 'secao-floricultura',
-        posicao: new Vector3(CENTRO_ARCO.x, 2.78, -4.9),
+        posicao: new Vector3(0, 2.78, -4.9),
         alinhamento: 'base',
         areas: AREAS_INTERNAS,
         distanciaReferencia: 6,
       },
-      ...this.canteiros.map(({ categoria, base }) => ({
-        id: `categoria-${categoria}`,
-        posicao: base.clone().add(new Vector3(0, ALTURA_ETIQUETA, 0)),
-        alinhamento: 'base' as const,
-        areas: ['floricultura'] as const,
-        distanciaReferencia: 3.6,
-      })),
+      // Etiquetas ao lado de cada vaso, do lado de fora (apontando para a planta);
+      // a do vaso central fica em cima.
+      ...this.canteiros.map(({ categoria, base, escala, lado }): AncoraRotulo => {
+        const meio = base.y + ALTURA_PLANTA * escala * 0.55;
+        const afastamento = 0.34 * escala;
+        if (lado === 'centro') {
+          return {
+            id: `categoria-${categoria}`,
+            posicao: new Vector3(base.x, base.y + ALTURA_PLANTA * escala + 0.04, base.z),
+            alinhamento: 'base',
+            areas: ['floricultura'],
+            distanciaReferencia: 3.6,
+          };
+        }
+        return {
+          id: `categoria-${categoria}`,
+          posicao: new Vector3(
+            base.x + (lado === 'esquerda' ? -afastamento : afastamento),
+            meio,
+            base.z,
+          ),
+          alinhamento: lado === 'esquerda' ? 'direita' : 'esquerda',
+          areas: ['floricultura'],
+          distanciaReferencia: 3.6,
+        };
+      }),
     ];
   }
 
@@ -190,6 +204,7 @@ export class FloriculturaArea implements ParteCena {
 
     if (canteiro) {
       this.destaque.position.copy(canteiro.base);
+      this.destaque.scale.setScalar(canteiro.escala);
     }
     this.destaque.visible = this.intensidade > 0.02;
     this.luz.intensity = this.intensidade * 2.5;
@@ -197,21 +212,55 @@ export class FloriculturaArea implements ParteCena {
     this.halo.emissiveIntensity = 0.6 + Math.sin(tempo * 3) * 0.2;
   }
 
-  private montarCanteiro(
-    categoria: CategoriaSkill,
-    rotulo: string,
-    base: Vector3,
-    m: Materiais,
-  ): void {
+  /** Duas estantes de plantas (uma de cada lado), com um andar por vaso. */
+  private montarEstantes(andares: number, m: Materiais): void {
+    if (!andares) return;
+    const { largura, profundidade, alturaAndar, basePrimeiroAndar } = ESTANTE;
+    const altura = basePrimeiroAndar + andares * alturaAndar;
+    for (const lado of [-1, 1]) {
+      const estante = new Group();
+      estante.position.set(lado * ESTANTE.x, 0, ESTANTE.z);
+      // Quatro pés.
+      for (const [px, pz] of [
+        [-1, -1],
+        [1, -1],
+        [-1, 1],
+        [1, 1],
+      ]) {
+        estante.add(
+          caixa(
+            0.05,
+            altura,
+            0.05,
+            m.madeira,
+            (px * (largura - 0.05)) / 2,
+            altura / 2,
+            (pz * (profundidade - 0.05)) / 2,
+          ),
+        );
+      }
+      // Tábuas: uma sob cada vaso e uma no topo.
+      for (let andar = 0; andar <= andares; andar++) {
+        const y = basePrimeiroAndar + andar * alturaAndar - 0.02;
+        estante.add(caixa(largura, 0.04, profundidade, m.madeiraClara, 0, y, 0));
+      }
+      this.estatico.add(estante);
+    }
+  }
+
+  private montarCanteiro(posicao: PosicaoCanteiro, rotulo: string, m: Materiais): void {
+    const { categoria, base, escala, lado } = posicao;
     const canteiro = new Group();
     canteiro.position.copy(base);
     canteiro.lookAt(OLHAR_PARA.x, base.y, OLHAR_PARA.z);
+    canteiro.scale.setScalar(escala);
 
-    // Caixote de madeira, quando o vaso fica mais alto.
-    if (base.y > 0.04) {
-      canteiro.add(caixa(0.56, base.y, 0.56, m.madeiraClara, 0, -base.y / 2, 0));
+    // Caixote de madeira sob o vaso central (em destaque).
+    if (lado === 'centro' && base.y > 0.04) {
+      const h = base.y / escala; // o caixote vai até o chão, compensando a escala do grupo
+      canteiro.add(caixa(0.56, h, 0.56, m.madeiraClara, 0, -h / 2, 0));
       [0.25, 0.5, 0.75].forEach((f) =>
-        canteiro.add(caixa(0.58, 0.015, 0.01, m.madeira, 0, -base.y * f, 0.285)),
+        canteiro.add(caixa(0.58, 0.015, 0.01, m.madeira, 0, -h * f, 0.285)),
       );
     }
 
@@ -220,8 +269,12 @@ export class FloriculturaArea implements ParteCena {
     this.estatico.add(canteiro);
 
     // Área de clique: vaso e planta (invisível; só o raycasting a enxerga).
-    const area = new Mesh(new CylinderGeometry(0.4, 0.4, ALTURA_ETIQUETA, 10), m.invisivel);
-    area.position.set(base.x, base.y + ALTURA_ETIQUETA / 2, base.z);
+    const alturaClique = ALTURA_PLANTA * escala;
+    const area = new Mesh(
+      new CylinderGeometry(0.36 * escala, 0.36 * escala, alturaClique, 10),
+      m.invisivel,
+    );
+    area.position.set(base.x, base.y + alturaClique / 2, base.z);
     area.name = `vaso__${categoria}`;
     this.alvosMeshes.push(
       ...marcarInterativo(area, {
@@ -231,7 +284,7 @@ export class FloriculturaArea implements ParteCena {
       }),
     );
     this.cliques.add(area);
-    this.canteiros.push({ categoria, base });
+    this.canteiros.push(posicao);
   }
 
   /** Vaso torneado (perfil girado em volta do eixo), com borda e faixa creme. */

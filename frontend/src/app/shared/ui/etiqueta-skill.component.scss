@@ -65,6 +65,64 @@
   }
 }
 
+// Ponteiro de lado: a etiqueta fica ao lado do objeto e aponta para ele.
+:host([data-ponteiro='esquerda']),
+:host([data-ponteiro='direita']) {
+  padding-bottom: 0;
+  text-align: left;
+
+  .etiqueta {
+    text-align: left;
+
+    &::before,
+    &::after {
+      top: 50%;
+      left: auto;
+      transform: translateY(-50%);
+    }
+  }
+}
+
+:host([data-ponteiro='direita']) {
+  padding-right: 11px;
+
+  .etiqueta {
+    &::before {
+      left: 100%;
+      border-width: 9px 0 9px 10px;
+      border-color: transparent;
+      border-left-color: rgb(74 46 27 / 35%);
+    }
+
+    &::after {
+      left: calc(100% - 1.5px);
+      border-width: 8px 0 8px 9px;
+      border-color: transparent;
+      border-left-color: #fff8eb;
+    }
+  }
+}
+
+:host([data-ponteiro='esquerda']) {
+  padding-left: 11px;
+
+  .etiqueta {
+    &::before {
+      right: 100%;
+      border-width: 9px 10px 9px 0;
+      border-color: transparent;
+      border-right-color: rgb(74 46 27 / 35%);
+    }
+
+    &::after {
+      right: calc(100% - 1.5px);
+      border-width: 8px 9px 8px 0;
+      border-color: transparent;
+      border-right-color: #fff8eb;
+    }
+  }
+}
+
 :host(:hover) .etiqueta {
   box-shadow: 0 10px 20px rgb(38 19 9 / 26%);
   transform: translateY(-3px);

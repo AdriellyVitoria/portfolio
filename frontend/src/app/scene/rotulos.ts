@@ -2,8 +2,12 @@ import { MathUtils, type PerspectiveCamera, Vector3 } from 'three';
 
 import type { Area } from '../core/models';
 
-/** Onde o rótulo encosta no ponto 3D: pela base (etiqueta com ponteiro) ou pelo topo (placa pendurada). */
-export type Alinhamento = 'base' | 'topo' | 'centro';
+/**
+ * Onde o rótulo encosta no ponto 3D: pela base (ponteiro para baixo), pelo topo (placa
+ * pendurada), pelo centro, ou de lado: `direita` = o rótulo fica à esquerda do ponto e
+ * encosta nele pela borda direita; `esquerda` = o contrário.
+ */
+export type Alinhamento = 'base' | 'topo' | 'centro' | 'esquerda' | 'direita';
 
 /** Ponto do mundo 3D onde um rótulo HTML fica preso. Definido pelas partes da cena. */
 export interface AncoraRotulo {
@@ -20,11 +24,15 @@ const DESLOCAMENTO: Record<Alinhamento, string> = {
   base: 'translate(-50%, -100%)',
   topo: 'translate(-50%, 0)',
   centro: 'translate(-50%, -50%)',
+  esquerda: 'translate(0, -50%)',
+  direita: 'translate(-100%, -50%)',
 };
 const ORIGEM: Record<Alinhamento, string> = {
   base: '50% 100%',
   topo: '50% 0',
   centro: '50% 50%',
+  esquerda: '0 50%',
+  direita: '100% 50%',
 };
 
 interface Rotulo {
