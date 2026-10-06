@@ -52,13 +52,15 @@ describe('áreas da cena', () => {
     });
   });
 
-  it('FloriculturaArea cria um vaso clicável por skill', () => {
+  it('FloriculturaArea cria um vaso clicável por categoria (não um por skill)', () => {
     const floricultura = new FloriculturaArea();
     floricultura.montar([...SKILLS]);
 
-    const ids = new Set(floricultura.alvos.map((m) => alvoDe(m)?.id));
-    expect(ids).toEqual(new Set(SKILLS.map((s) => s.id)));
-    expect(floricultura.grupo.getObjectByName('vaso__java')).toBeDefined();
+    const categorias = new Set(SKILLS.map((s) => s.categoria));
+    expect(floricultura.alvos).toHaveLength(categorias.size);
+    expect(new Set(floricultura.alvos.map((m) => alvoDe(m)?.id))).toEqual(categorias);
+    expect(floricultura.alvos.every((m) => alvoDe(m)?.tipo === 'categoria')).toBe(true);
+    expect(floricultura.grupo.getObjectByName('vaso__BACKEND')).toBeDefined();
   });
 
   it('CafeArea tem notebook, cardápio, pasta e o sino da Aurora clicáveis', () => {

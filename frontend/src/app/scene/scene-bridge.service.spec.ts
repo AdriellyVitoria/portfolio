@@ -53,15 +53,15 @@ describe('SceneBridgeService', () => {
       expect(estado.projetoSelecionadoId()).toBe('nfe-estudo');
     });
 
-    it('clicar num vaso liga e desliga o filtro da skill', () => {
-      const vaso = { tipo: 'skill' as const, id: 'java', rotulo: 'Java' };
+    it('clicar num vaso escolhe a categoria; clicar de novo volta às categorias', () => {
+      const vaso = { tipo: 'categoria' as const, id: 'BACKEND' as const, rotulo: 'Backend' };
 
       motor.opcoes!.callbacks.aoSelecionar(vaso);
-      expect(estado.filtroTecnologia()).toBe('java');
+      expect(estado.categoriaSkill()).toBe('BACKEND');
       expect(estado.areaAtual()).toBe('floricultura');
 
       motor.opcoes!.callbacks.aoSelecionar(vaso);
-      expect(estado.filtroTecnologia()).toBeNull();
+      expect(estado.categoriaSkill()).toBeNull();
     });
 
     it('clicar num objeto do café abre o painel correspondente', () => {
@@ -78,7 +78,11 @@ describe('SceneBridgeService', () => {
     });
 
     it('hover mostra o nome do objeto perto do cursor', () => {
-      motor.opcoes!.callbacks.aoPassar({ tipo: 'skill', id: 'java', rotulo: 'Java' }, 10, 20);
+      motor.opcoes!.callbacks.aoPassar(
+        { tipo: 'categoria', id: 'BACKEND', rotulo: 'Java' },
+        10,
+        20,
+      );
       expect(ponte.dicaCursor()).toEqual({ rotulo: 'Java', x: 10, y: 20 });
 
       motor.opcoes!.callbacks.aoPassar(null, 0, 0);
@@ -103,7 +107,7 @@ describe('SceneBridgeService', () => {
       TestBed.tick();
 
       expect(motor.livraria.destacar).toHaveBeenLastCalledWith(new Set(['nfe-estudo']));
-      expect(motor.floricultura.selecionar).toHaveBeenLastCalledWith('kafka');
+      expect(motor.floricultura.selecionar).toHaveBeenLastCalledWith('MENSAGERIA');
     });
   });
 

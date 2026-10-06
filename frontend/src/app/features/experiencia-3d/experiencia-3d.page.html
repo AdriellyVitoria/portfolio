@@ -51,32 +51,50 @@
         </ul>
       }
       @case ('floricultura') {
-        <ul class="hud__itens" aria-label="Skills">
-          @for (skill of estado.skills(); track skill.id) {
-            <li>
-              <button
-                type="button"
-                app-tag
-                [tom]="skill.destaque ? 'destaque' : 'neutro'"
-                [ativa]="estado.filtroTecnologia() === skill.id"
-                [attr.aria-pressed]="estado.filtroTecnologia() === skill.id"
-                (click)="estado.alternarTecnologia(skill.id)"
-              >
-                {{ skill.nome }}
-              </button>
-            </li>
-          }
-        </ul>
-        @if (estado.skillFiltrada(); as skill) {
+        @if (categoriaAtual(); as categoria) {
           <p class="hud__resumo">
-            {{ skill.nome }}: {{ estado.projetosDestacados().length }}
-            {{ estado.projetosDestacados().length === 1 ? 'projeto' : 'projetos' }}
-            @if (estado.projetosDestacados().length) {
-              <button type="button" class="hud__acao" (click)="verNaLivraria()">
-                Ver na livraria
-              </button>
-            }
+            {{ categoria.rotulo }}
+            <button type="button" class="hud__acao" (click)="estado.selecionarCategoria(null)">
+              Ver todas as categorias
+            </button>
           </p>
+          <ul class="hud__itens" [attr.aria-label]="'Skills de ' + categoria.rotulo">
+            @for (skill of skillsDaCategoria(); track skill.id) {
+              <li>
+                <button
+                  type="button"
+                  app-tag
+                  [tom]="skill.destaque ? 'destaque' : 'neutro'"
+                  [ativa]="estado.filtroTecnologia() === skill.id"
+                  [attr.aria-pressed]="estado.filtroTecnologia() === skill.id"
+                  (click)="estado.alternarTecnologia(skill.id)"
+                >
+                  {{ skill.nome }}
+                </button>
+              </li>
+            }
+          </ul>
+          @if (estado.skillFiltrada(); as skill) {
+            <p class="hud__resumo">
+              {{ skill.nome }}: {{ estado.projetosDestacados().length }}
+              {{ estado.projetosDestacados().length === 1 ? 'projeto' : 'projetos' }}
+              @if (estado.projetosDestacados().length) {
+                <button type="button" class="hud__acao" (click)="verNaLivraria()">
+                  Ver na livraria
+                </button>
+              }
+            </p>
+          }
+        } @else {
+          <ul class="hud__itens" aria-label="Categorias de skills">
+            @for (categoria of categorias(); track categoria.id) {
+              <li>
+                <button type="button" app-tag (click)="estado.selecionarCategoria(categoria.id)">
+                  {{ categoria.rotulo }} · {{ categoria.total }}
+                </button>
+              </li>
+            }
+          </ul>
         }
       }
       @case ('cafe') {

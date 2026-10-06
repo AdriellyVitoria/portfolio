@@ -1,11 +1,12 @@
 import type { Object3D } from 'three';
 
-import type { PainelCafe } from '../core/models';
+import type { CategoriaSkill, PainelCafe } from '../core/models';
 
 /** O que um objeto clicável da cena representa. Fica em `mesh.userData.alvo`. */
 export type AlvoInterativo =
   | { tipo: 'projeto'; id: string; rotulo: string }
-  | { tipo: 'skill'; id: string; rotulo: string }
+  /** Um vaso da floricultura = uma categoria de skills. */
+  | { tipo: 'categoria'; id: CategoriaSkill; rotulo: string }
   | { tipo: 'cafe'; id: PainelCafe; rotulo: string }
   | { tipo: 'aurora'; id: 'aurora'; rotulo: string };
 

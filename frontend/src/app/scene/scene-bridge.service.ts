@@ -49,7 +49,7 @@ export class SceneBridgeService {
     });
     effect(() => {
       if (!this.ativo()) return;
-      this.motor.floricultura?.selecionar(this.estado.filtroTecnologia());
+      this.motor.floricultura?.selecionar(this.estado.categoriaSkill());
     });
     effect(() => {
       if (!this.ativo()) return;
@@ -91,9 +91,10 @@ export class SceneBridgeService {
         this.estado.irPara('livraria');
         this.estado.selecionarProjeto(alvo.id);
         break;
-      case 'skill':
+      case 'categoria':
         this.estado.irPara('floricultura');
-        this.estado.alternarTecnologia(alvo.id);
+        // Tocar de novo no vaso escolhido volta à lista de categorias.
+        this.estado.selecionarCategoria(this.estado.categoriaSkill() === alvo.id ? null : alvo.id);
         break;
       case 'cafe':
         this.estado.irPara('cafe');

@@ -26,8 +26,8 @@ export const ESTACOES: Record<Area, Estacao> = {
   },
   floricultura: {
     area: 'floricultura',
-    posicao: new Vector3(0, 2.6, 1.7),
-    alvo: new Vector3(0, 1.15, -3.6),
+    posicao: new Vector3(0, 1.95, 1.5),
+    alvo: new Vector3(0, 1.1, -2.9),
   },
   cafe: { area: 'cafe', posicao: new Vector3(3.9, 1.8, 1.2), alvo: new Vector3(4.9, 0.85, -2.2) },
   // A Aurora fica atrás do balcão do café.

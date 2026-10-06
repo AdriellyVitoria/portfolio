@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
 
 import { AuroraService } from '../../core/aurora/aurora.service';
 import { PerfilRepository } from '../../core/data/perfil.repository';
-import type { Area, PainelCafe } from '../../core/models';
+import { type Area, CATEGORIAS_SKILL, type PainelCafe } from '../../core/models';
 import { SEO_PADRAO, SeoService } from '../../core/seo/seo.service';
 import { PortfolioStateService } from '../../core/state/portfolio-state.service';
 import { suportaWebGL } from '../../scene/qualidade';
@@ -49,7 +49,7 @@ const ESTACOES_MENU: EstacaoMenu[] = [
   {
     area: 'floricultura',
     rotulo: 'Floricultura',
-    dica: 'Cada vaso é uma skill. Escolha uma para destacar os projetos.',
+    dica: 'Cada vaso é uma categoria de skills. Toque em um para ver as tecnologias.',
   },
   {
     area: 'cafe',
@@ -113,6 +113,19 @@ export default class Experiencia3dPage {
   protected readonly pilulaVisivel = computed(() => this.aurora.aberta() && !this.chatVisivel());
   protected readonly projetosOrdenados = computed(() =>
     [...this.estado.projetos()].sort((a, b) => Number(b.destaque) - Number(a.destaque)),
+  );
+  /** Floricultura: categorias (um vaso cada) e as skills da categoria escolhida. */
+  protected readonly categorias = computed(() =>
+    CATEGORIAS_SKILL.map((c) => ({
+      ...c,
+      total: this.estado.skills().filter((s) => s.categoria === c.id).length,
+    })).filter((c) => c.total),
+  );
+  protected readonly categoriaAtual = computed(() =>
+    CATEGORIAS_SKILL.find((c) => c.id === this.estado.categoriaSkill()),
+  );
+  protected readonly skillsDaCategoria = computed(() =>
+    this.estado.skills().filter((s) => s.categoria === this.estado.categoriaSkill()),
   );
   protected readonly tituloPainelCafe = computed(
     () => ITENS_CAFE.find((i) => i.id === this.estado.painelCafe())?.titulo ?? '',
