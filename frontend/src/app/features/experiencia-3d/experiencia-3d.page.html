@@ -28,11 +28,11 @@
   </div>
 }
 
-<section class="hud" aria-label="Navegação da experiência 3D">
+<section class="hud" [class.hud--com-chat]="chatVisivel()" aria-label="Navegação da experiência 3D">
   <div class="hud__estacao">
     <p class="hud__dica" aria-live="polite">{{ estacaoAtual().dica }}</p>
 
-    @switch (estado.areaAtual()) {
+    @switch (areaMenu()) {
       @case ('livraria') {
         <ul class="hud__itens" aria-label="Projetos">
           @for (projeto of projetosOrdenados(); track projeto.id) {
@@ -80,7 +80,18 @@
         }
       }
       @case ('cafe') {
-        <ul class="hud__itens" aria-label="Objetos da mesa">
+        <ul class="hud__itens" aria-label="Objetos do café">
+          <li>
+            <button
+              type="button"
+              app-tag
+              tom="destaque"
+              [ativa]="chatVisivel()"
+              (click)="falarComAurora()"
+            >
+              Sino · Falar com a Aurora
+            </button>
+          </li>
           @for (item of itensCafe; track item.id) {
             <li>
               <button
@@ -103,8 +114,8 @@
       <button
         type="button"
         class="hud__botao"
-        [class.hud__botao--ativo]="estado.areaAtual() === estacao.area"
-        [attr.aria-current]="estado.areaAtual() === estacao.area ? 'location' : null"
+        [class.hud__botao--ativo]="areaMenu() === estacao.area"
+        [attr.aria-current]="areaMenu() === estacao.area ? 'location' : null"
         (click)="estado.irPara(estacao.area)"
       >
         {{ estacao.rotulo }}
@@ -112,6 +123,12 @@
     }
   </nav>
 </section>
+
+@if (chatVisivel()) {
+  <app-aurora-chat class="aurora" variante="lateral" />
+} @else if (pilulaVisivel()) {
+  <app-aurora-pilula class="aurora-pilula" (voltar)="voltarParaAurora()" />
+}
 
 @if (estado.projetoSelecionado(); as projeto) {
   <app-painel [titulo]="projeto.nome" (fechar)="estado.fecharProjeto()">

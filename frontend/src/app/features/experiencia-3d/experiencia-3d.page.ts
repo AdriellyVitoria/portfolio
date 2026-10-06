@@ -5,6 +5,7 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -12,6 +13,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
+import { AuroraService } from '../../core/aurora/aurora.service';
 import { PerfilRepository } from '../../core/data/perfil.repository';
 import type { Area, PainelCafe } from '../../core/models';
 import { SEO_PADRAO, SeoService } from '../../core/seo/seo.service';
@@ -23,6 +25,8 @@ import { PainelComponent } from '../../shared/ui/painel.component';
 import { TagComponent } from '../../shared/ui/tag.component';
 import { ContatoComponent } from '../cafe/contato.component';
 import { SobreComponent } from '../cafe/sobre.component';
+import { AuroraChatComponent } from '../aurora-chat/aurora-chat.component';
+import { AuroraPilulaComponent } from '../aurora-chat/aurora-pilula.component';
 import { PainelProjetoComponent } from '../livraria/painel-projeto.component';
 
 interface EstacaoMenu {
@@ -32,7 +36,11 @@ interface EstacaoMenu {
 }
 
 const ESTACOES_MENU: EstacaoMenu[] = [
-  { area: 'entrada', rotulo: 'Entrada', dica: 'Bem-vindo! Escolha uma área para entrar.' },
+  {
+    area: 'entrada',
+    rotulo: 'Entrada',
+    dica: 'Bem-vindo! Escolha uma área para entrar. No café, a Aurora responde suas perguntas.',
+  },
   {
     area: 'livraria',
     rotulo: 'Livraria',
@@ -43,8 +51,15 @@ const ESTACOES_MENU: EstacaoMenu[] = [
     rotulo: 'Floricultura',
     dica: 'Cada vaso é uma skill. Escolha uma para destacar os projetos.',
   },
-  { area: 'cafe', rotulo: 'Café', dica: 'Notebook, cardápio e pasta: um pouco sobre mim.' },
+  {
+    area: 'cafe',
+    rotulo: 'Café',
+    dica: 'Notebook, cardápio e pasta: um pouco sobre mim. Toque no sino do balcão para falar com a Aurora.',
+  },
 ];
+
+/** O balcão da Aurora faz parte do café (no menu e no HUD). */
+const NO_CAFE: readonly Area[] = ['cafe', 'aurora'];
 
 const ITENS_CAFE: { id: PainelCafe; rotulo: string; titulo: string }[] = [
   { id: 'apresentacao', rotulo: 'Notebook', titulo: 'Apresentação' },
@@ -66,6 +81,8 @@ const ITENS_CAFE: { id: PainelCafe; rotulo: string; titulo: string }[] = [
     TagComponent,
     SobreComponent,
     ContatoComponent,
+    AuroraChatComponent,
+    AuroraPilulaComponent,
   ],
   providers: [SceneEngineService, SceneBridgeService],
   templateUrl: './experiencia-3d.page.html',
@@ -75,15 +92,25 @@ const ITENS_CAFE: { id: PainelCafe; rotulo: string; titulo: string }[] = [
 export default class Experiencia3dPage {
   protected readonly estado = inject(PortfolioStateService);
   protected readonly ponte = inject(SceneBridgeService);
+  protected readonly aurora = inject(AuroraService);
   protected readonly perfil = toSignal(inject(PerfilRepository).obter());
 
   protected readonly estacoes = ESTACOES_MENU;
   protected readonly itensCafe = ITENS_CAFE;
   protected readonly semWebGL = signal(false);
 
-  protected readonly estacaoAtual = computed(
-    () => ESTACOES_MENU.find((e) => e.area === this.estado.areaAtual()) ?? ESTACOES_MENU[0],
+  /** Área do menu (o balcão da Aurora conta como café). */
+  protected readonly areaMenu = computed<Area>(() =>
+    NO_CAFE.includes(this.estado.areaAtual()) ? 'cafe' : this.estado.areaAtual(),
   );
+  protected readonly estacaoAtual = computed(
+    () => ESTACOES_MENU.find((e) => e.area === this.areaMenu()) ?? ESTACOES_MENU[0],
+  );
+  /** O chat só aparece no café; fora dele, só o atalho para voltar. */
+  protected readonly chatVisivel = computed(
+    () => this.aurora.aberta() && !this.aurora.recolhida() && this.areaMenu() === 'cafe',
+  );
+  protected readonly pilulaVisivel = computed(() => this.aurora.aberta() && !this.chatVisivel());
   protected readonly projetosOrdenados = computed(() =>
     [...this.estado.projetos()].sort((a, b) => Number(b.destaque) - Number(a.destaque)),
   );
@@ -100,6 +127,11 @@ export default class Experiencia3dPage {
         'Entre no café, livraria e floricultura de outono e conheça os projetos e skills de Adrielly.',
     });
     this.estado.irPara('entrada');
+
+    // Saiu do café com a conversa aberta (pelo menu ou por uma ação): recolhe o chat.
+    effect(() => {
+      if (this.areaMenu() !== 'cafe') this.aurora.recolher();
+    });
 
     // WebGL só existe no navegador: nada de 3D no prerender.
     afterNextRender(() => {
@@ -123,5 +155,15 @@ export default class Experiencia3dPage {
 
   protected verNaLivraria(): void {
     this.estado.irPara('livraria');
+  }
+
+  protected falarComAurora(): void {
+    this.estado.irPara('aurora');
+    this.aurora.abrir();
+  }
+
+  protected voltarParaAurora(): void {
+    this.estado.irPara('aurora');
+    this.aurora.voltar();
   }
 }

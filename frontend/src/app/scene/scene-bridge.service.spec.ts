@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { provideDados } from '../core/data/provide-dados';
+import { AuroraService } from '../core/aurora/aurora.service';
 import { PortfolioStateService } from '../core/state/portfolio-state.service';
 import { ESTACOES } from './estacoes';
 import { SceneBridgeService } from './scene-bridge.service';
@@ -14,7 +15,7 @@ class MotorFalso {
   destruir = vi.fn();
   livraria = { destacar: vi.fn(), selecionar: vi.fn() };
   floricultura = { selecionar: vi.fn() };
-  cafe = { marcarAberto: vi.fn(), marcarSobCursor: vi.fn() };
+  cafe = { marcarAberto: vi.fn(), marcarSobCursor: vi.fn(), marcarSinoSobCursor: vi.fn() };
   iniciar(_canvas: HTMLCanvasElement, opcoes: OpcoesMotor) {
     this.opcoes = opcoes;
   }
@@ -67,6 +68,13 @@ describe('SceneBridgeService', () => {
       motor.opcoes!.callbacks.aoSelecionar({ tipo: 'cafe', id: 'trajetoria', rotulo: '' });
 
       expect(estado.painelCafe()).toBe('trajetoria');
+    });
+
+    it('tocar o sino leva até a Aurora e abre a conversa', () => {
+      motor.opcoes!.callbacks.aoSelecionar({ tipo: 'aurora', id: 'aurora', rotulo: '' });
+
+      expect(estado.areaAtual()).toBe('aurora');
+      expect(TestBed.inject(AuroraService).aberta()).toBe(true);
     });
 
     it('hover mostra o nome do objeto perto do cursor', () => {

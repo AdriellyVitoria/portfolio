@@ -66,4 +66,37 @@ describe('Experiencia3dPage', () => {
     expect(el.querySelector('dialog .painel__titulo')?.textContent).toContain('Contato');
     expect(el.querySelector('dialog app-contato')).not.toBeNull();
   });
+
+  describe('Aurora', () => {
+    it('só pode ser chamada no café: o sino abre o painel e leva ao balcão', async () => {
+      const { fixture, el, botao, estado } = await renderizar();
+      expect(botao('Sino')).toBeUndefined(); // fora do café não há como iniciar a conversa
+
+      botao('Café').click();
+      await fixture.whenStable();
+      botao('Sino').click();
+      await fixture.whenStable();
+
+      expect(estado.areaAtual()).toBe('aurora');
+      expect(el.querySelector('app-aurora-chat')).not.toBeNull();
+      expect(botao('Café').getAttribute('aria-current')).toBe('location');
+    });
+
+    it('sair do café recolhe a conversa, e a pílula volta para ela', async () => {
+      const { fixture, el, botao, estado } = await renderizar();
+      botao('Café').click();
+      await fixture.whenStable();
+      botao('Sino').click();
+      await fixture.whenStable();
+
+      botao('Livraria').click();
+      await fixture.whenStable();
+      expect(el.querySelector('app-aurora-chat')).toBeNull();
+
+      el.querySelector<HTMLButtonElement>('app-aurora-pilula button')!.click();
+      await fixture.whenStable();
+      expect(estado.areaAtual()).toBe('aurora');
+      expect(el.querySelector('app-aurora-chat')).not.toBeNull();
+    });
+  });
 });

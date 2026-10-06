@@ -147,6 +147,42 @@
   }
 }
 
+// Painel da Aurora: lateral no desktop, folha de meia tela no celular.
+// Não é modal: a cena continua visível e reage às ações da conversa.
+.aurora {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  height: 62dvh;
+  border-radius: var(--raio-lg) var(--raio-lg) 0 0;
+
+  @include a-partir-de($bp-md) {
+    inset: 76px var(--esp-4) var(--esp-4) auto;
+    width: 24rem;
+    height: auto;
+    border-radius: var(--raio-lg);
+  }
+}
+
+.aurora-pilula {
+  position: absolute;
+  z-index: 2;
+  top: 72px;
+  right: var(--esp-4);
+}
+
+// No celular o chat ocupa a parte de baixo: a caixa da estação e o menu dão lugar a ele.
+// No desktop, o HUD encolhe para não ficar embaixo do painel.
+.hud--com-chat {
+  @media (max-width: ($bp-md - 1px)) {
+    display: none;
+  }
+
+  @include a-partir-de($bp-md) {
+    right: calc(24rem + var(--esp-8));
+  }
+}
+
 .dica-cursor {
   position: fixed;
   z-index: 3;

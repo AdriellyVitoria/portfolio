@@ -6,7 +6,8 @@ import type { PainelCafe } from '../core/models';
 export type AlvoInterativo =
   | { tipo: 'projeto'; id: string; rotulo: string }
   | { tipo: 'skill'; id: string; rotulo: string }
-  | { tipo: 'cafe'; id: PainelCafe; rotulo: string };
+  | { tipo: 'cafe'; id: PainelCafe; rotulo: string }
+  | { tipo: 'aurora'; id: 'aurora'; rotulo: string };
 
 /** Contrato comum das partes da cena (ambiente, livraria, floricultura...). */
 export interface ParteCena {

@@ -6,6 +6,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
+  SphereGeometry,
   TorusGeometry,
 } from 'three';
 
@@ -37,6 +38,15 @@ export class CafeArea implements ParteCena {
   private readonly itens: ItemMesa[] = [];
   private aberto: PainelCafe | null = null;
   private sobCursor: PainelCafe | null = null;
+  /** Sino do balcão: chama a Aurora. Pulsa sempre, para ser encontrado. */
+  private readonly materialSino = new MeshStandardMaterial({
+    color: PALETA.amarelo,
+    emissive: new Color(PALETA.amarelo),
+    emissiveIntensity: 0.2,
+    metalness: 0.6,
+    roughness: 0.35,
+  });
+  private sinoSobCursor = false;
 
   constructor() {
     this.grupo.name = 'cafe';
@@ -55,6 +65,10 @@ export class CafeArea implements ParteCena {
     this.sobCursor = painel;
   }
 
+  marcarSinoSobCursor(sobCursor: boolean): void {
+    this.sinoSobCursor = sobCursor;
+  }
+
   update(dt: number, tempo: number): void {
     const suavidade = 1 - Math.exp(-dt * 8);
     for (const item of this.itens) {
@@ -66,6 +80,9 @@ export class CafeArea implements ParteCena {
       item.brilho = MathUtils.lerp(item.brilho, ativo ? 0.45 : convite, suavidade);
       item.materiais.forEach((m) => (m.emissiveIntensity = item.brilho));
     }
+    this.materialSino.emissiveIntensity = this.sinoSobCursor
+      ? 0.7
+      : 0.2 + (Math.sin(tempo * 2.4) + 1) * 0.15;
   }
 
   private montarBalcao(): void {
@@ -108,6 +125,7 @@ export class CafeArea implements ParteCena {
     );
     pote.position.set(1.15, 1.2, 0);
     balcao.add(pote);
+    balcao.add(this.montarSino());
     this.grupo.add(balcao);
 
     // Lousa na parede.
@@ -126,6 +144,56 @@ export class CafeArea implements ParteCena {
     );
     lousa.position.set(5.2, 2.15, -4.965); // à frente da moldura (evita z-fighting)
     this.grupo.add(caixa(2.32, 0.87, 0.04, materialFosco(PALETA.madeira), 5.2, 2.15, -5.0), lousa);
+  }
+
+  /** Sino de balcão + plaquinha "Fale com a Aurora" (abre a conversa). */
+  private montarSino(): Group {
+    const sino = marcarDinamico(new Group());
+    sino.position.set(-0.2, 1.06, 0.17);
+    const base = new Mesh(
+      new CylinderGeometry(0.07, 0.08, 0.02, 16),
+      materialFosco(PALETA.marromEscuro),
+    );
+    base.position.y = 0.01;
+    const cupula = new Mesh(
+      new SphereGeometry(0.06, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      this.materialSino,
+    );
+    cupula.position.y = 0.02;
+    const botao = new Mesh(new SphereGeometry(0.015, 8, 6), this.materialSino);
+    botao.position.y = 0.09;
+    sino.add(base, cupula, botao);
+
+    const textura = texturaDeTexto('Fale com a Aurora', {
+      largura: 512,
+      altura: 160,
+      fundo: '#3f5634',
+      cor: '#f6ecdb',
+      fonte: '600 64px "Fraunces Variable", Georgia, serif',
+    });
+    if (textura) {
+      const placa = new Mesh(
+        new PlaneGeometry(0.3, 0.094),
+        new MeshStandardMaterial({ map: textura }),
+      );
+      placa.position.set(0.24, 0.07, 0.02);
+      placa.rotation.x = -0.25;
+      sino.add(placa);
+    }
+
+    // Área de clique generosa em volta do sino e da placa.
+    const area = caixa(0.6, 0.25, 0.25, new MeshStandardMaterial({ visible: false }), 0.12, 0.1, 0);
+    area.castShadow = false;
+    sino.add(area);
+    sino.name = 'aurora__sino';
+    this.alvos.push(
+      ...marcarInterativo(sino, {
+        tipo: 'aurora',
+        id: 'aurora',
+        rotulo: 'Sino · Falar com a Aurora',
+      }),
+    );
+    return sino;
   }
 
   private montarMesa(): void {

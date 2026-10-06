@@ -1,5 +1,6 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
+import { AuroraService } from '../core/aurora/aurora.service';
 import { PortfolioStateService } from '../core/state/portfolio-state.service';
 import { ESTACOES } from './estacoes';
 import { detectarQualidade, prefereMenosMovimento } from './qualidade';
@@ -22,6 +23,7 @@ export interface DicaCursor {
 export class SceneBridgeService {
   private readonly estado = inject(PortfolioStateService);
   private readonly motor = inject(SceneEngineService);
+  private readonly aurora = inject(AuroraService);
   private readonly ativo = signal(false);
 
   /** A cena desenhou o primeiro frame (esconde a tela de carregamento). */
@@ -65,6 +67,7 @@ export class SceneBridgeService {
         aoPassar: (alvo, x, y) => {
           this.dicaCursor.set(alvo ? { rotulo: alvo.rotulo, x, y } : null);
           this.motor.cafe?.marcarSobCursor(alvo?.tipo === 'cafe' ? alvo.id : null);
+          this.motor.cafe?.marcarSinoSobCursor(alvo?.tipo === 'aurora');
         },
         aoArrastar: () => undefined,
         aoSoltar: () => undefined,
@@ -95,6 +98,10 @@ export class SceneBridgeService {
       case 'cafe':
         this.estado.irPara('cafe');
         this.estado.abrirPainelCafe(alvo.id);
+        break;
+      case 'aurora':
+        this.estado.irPara('aurora');
+        this.aurora.abrir();
         break;
     }
   }

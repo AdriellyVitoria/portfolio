@@ -61,10 +61,10 @@ describe('áreas da cena', () => {
     expect(floricultura.grupo.getObjectByName('vaso__java')).toBeDefined();
   });
 
-  it('CafeArea tem notebook, cardápio e pasta clicáveis', () => {
+  it('CafeArea tem notebook, cardápio, pasta e o sino da Aurora clicáveis', () => {
     const cafe = new CafeArea();
 
     const paineis = new Set(cafe.alvos.map((m) => alvoDe(m)?.id));
-    expect(paineis).toEqual(new Set(['apresentacao', 'trajetoria', 'contato']));
+    expect(paineis).toEqual(new Set(['apresentacao', 'trajetoria', 'contato', 'aurora']));
   });
 });
