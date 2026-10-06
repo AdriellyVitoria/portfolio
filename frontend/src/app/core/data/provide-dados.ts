@@ -1,5 +1,7 @@
 import { type EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 
+import { ChatRepository } from './chat.repository';
+import { ChatLocalRepository } from './local/chat-local.repository';
 import { PerfilLocalRepository } from './local/perfil-local.repository';
 import { ProjetoLocalRepository } from './local/projeto-local.repository';
 import { SkillLocalRepository } from './local/skill-local.repository';
@@ -33,5 +35,6 @@ export function provideDados({ fonte, latenciaSimuladaMs = 0 }: OpcoesDados): En
     { provide: ProjetoRepository, useClass: ProjetoLocalRepository },
     { provide: SkillRepository, useClass: SkillLocalRepository },
     { provide: PerfilRepository, useClass: PerfilLocalRepository },
+    { provide: ChatRepository, useClass: ChatLocalRepository },
   ]);
 }
