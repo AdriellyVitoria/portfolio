@@ -1,0 +1,112 @@
+<header class="topo">
+  <app-avatar-aurora [tamanho]="44" />
+  <div class="topo__texto">
+    <p class="topo__nome" id="aurora-titulo">Aurora</p>
+    <p class="topo__papel">Guia do portfólio · responde só com o que está aqui</p>
+  </div>
+  @if (variante() === 'lateral') {
+    <button
+      type="button"
+      class="topo__botao"
+      aria-label="Recolher conversa"
+      (click)="aurora.recolher()"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 12h12" />
+      </svg>
+    </button>
+    <button
+      type="button"
+      class="topo__botao"
+      aria-label="Fechar conversa"
+      (click)="aurora.fechar()"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+  }
+</header>
+
+<ol
+  #lista
+  class="mensagens"
+  aria-live="polite"
+  aria-relevant="additions"
+  aria-labelledby="aurora-titulo"
+>
+  @for (mensagem of aurora.mensagens(); track mensagem.id) {
+    <li class="mensagem" [class.mensagem--usuario]="mensagem.autor === 'USUARIO'">
+      <span class="sr-only">{{ mensagem.autor === 'AURORA' ? 'Aurora:' : 'Você:' }}</span>
+      {{ mensagem.texto }}
+    </li>
+  }
+  @if (aurora.digitando()) {
+    <li class="mensagem mensagem--digitando">
+      <span class="sr-only">Aurora está digitando</span>
+      <span class="ponto" aria-hidden="true"></span>
+      <span class="ponto" aria-hidden="true"></span>
+      <span class="ponto" aria-hidden="true"></span>
+    </li>
+  }
+</ol>
+
+@if (aurora.sugestoes().length && !aurora.digitando()) {
+  <div class="sugestoes" role="group" aria-label="Perguntas sugeridas">
+    @for (sugestao of aurora.sugestoes(); track sugestao) {
+      <button type="button" app-tag (click)="enviar(sugestao)">{{ sugestao }}</button>
+    }
+  </div>
+}
+
+<form class="campo" (submit)="$event.preventDefault(); enviar()">
+  <label class="sr-only" for="aurora-pergunta">Pergunte à Aurora</label>
+  <input
+    #campo
+    id="aurora-pergunta"
+    type="text"
+    autocomplete="off"
+    placeholder="Pergunte sobre projetos, skills, experiência…"
+    [maxLength]="maximo"
+    [value]="texto()"
+    (input)="digitar($event)"
+  />
+  <button
+    type="submit"
+    class="campo__enviar"
+    aria-label="Enviar pergunta"
+    [disabled]="!texto().trim() || aurora.digitando()"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h13M13 6l6 6-6 6" />
+    </svg>
+  </button>
+</form>
