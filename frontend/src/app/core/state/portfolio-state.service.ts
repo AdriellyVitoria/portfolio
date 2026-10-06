@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ProjetoRepository } from '../data/projeto.repository';
 import { SkillRepository } from '../data/skill.repository';
-import type { Area, PainelCafe, Projeto, Skill } from '../models';
+import type { Area, CategoriaSkill, PainelCafe, Projeto, Skill } from '../models';
 
 /**
  * Estado compartilhado do portfólio.
@@ -29,12 +29,15 @@ export class PortfolioStateService {
   private readonly _projetoSelecionadoId = signal<string | null>(null);
   private readonly _filtroTecnologia = signal<string | null>(null);
   private readonly _painelCafe = signal<PainelCafe | null>(null);
+  private readonly _categoriaSkill = signal<CategoriaSkill | null>(null);
 
   readonly areaAtual = this._areaAtual.asReadonly();
   readonly projetoSelecionadoId = this._projetoSelecionadoId.asReadonly();
   /** Id da skill usada como filtro (ex.: 'java'). */
   readonly filtroTecnologia = this._filtroTecnologia.asReadonly();
   readonly painelCafe = this._painelCafe.asReadonly();
+  /** Categoria escolhida na floricultura (um vaso por categoria). */
+  readonly categoriaSkill = this._categoriaSkill.asReadonly();
 
   // --- Derivados ---
   readonly skillsPorId = computed(() => new Map(this.skills().map((s) => [s.id, s])));
@@ -88,6 +91,7 @@ export class PortfolioStateService {
       return false;
     }
     this._filtroTecnologia.set(skill.id);
+    this._categoriaSkill.set(skill.categoria);
     return true;
   }
 
@@ -103,6 +107,11 @@ export class PortfolioStateService {
     } else {
       this.destacarTecnologia(termo);
     }
+  }
+
+  /** Escolhe a categoria de skills (ou volta à lista de categorias com `null`). */
+  selecionarCategoria(categoria: CategoriaSkill | null): void {
+    this._categoriaSkill.set(categoria);
   }
 
   abrirPainelCafe(painel: PainelCafe): void {

@@ -79,3 +79,25 @@ describe('PortfolioStateService', () => {
     });
   });
 });
+
+describe('PortfolioStateService — categorias da floricultura', () => {
+  let estado: PortfolioStateService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideDados({ fonte: 'local' })] });
+    estado = TestBed.inject(PortfolioStateService);
+  });
+
+  it('escolhe e limpa a categoria', () => {
+    estado.selecionarCategoria('BACKEND');
+    expect(estado.categoriaSkill()).toBe('BACKEND');
+
+    estado.selecionarCategoria(null);
+    expect(estado.categoriaSkill()).toBeNull();
+  });
+
+  it('destacar uma tecnologia também escolhe a categoria dela (para o vaso acender)', () => {
+    estado.destacarTecnologia('Redis');
+    expect(estado.categoriaSkill()).toBe('MENSAGERIA');
+  });
+});
