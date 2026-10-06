@@ -42,7 +42,7 @@ export class AuroraChatComponent {
   private readonly campo = viewChild.required<ElementRef<HTMLInputElement>>('campo');
 
   constructor() {
-    // Garante a boas-vindas. Quem abre o painel do café é a página 3D (sino ou HUD).
+    // Garante a boas-vindas. Quem abre o painel do café é a página 3D (tablet ou HUD).
     this.aurora.cumprimentar();
 
     // Mensagem nova: rola a conversa até o fim.

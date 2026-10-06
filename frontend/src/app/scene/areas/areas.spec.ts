@@ -1,7 +1,8 @@
-import type { MeshStandardMaterial } from 'three';
+import { type MeshStandardMaterial, PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three';
 
 import { PROJETOS } from '../../core/data/local/projetos.dados';
 import { SKILLS } from '../../core/data/local/skills.dados';
+import { ESTACOES } from '../estacoes';
 import { alvoDe } from '../tipos';
 import { CafeArea } from './cafe.area';
 import { FloriculturaArea } from './floricultura.area';
@@ -63,10 +64,56 @@ describe('áreas da cena', () => {
     expect(floricultura.grupo.getObjectByName('vaso__BACKEND')).toBeDefined();
   });
 
-  it('CafeArea tem notebook, cardápio, pasta e o sino da Aurora clicáveis', () => {
+  it('CafeArea tem notebook, cardápio, pasta e o tablet da Aurora clicáveis', () => {
     const cafe = new CafeArea();
 
     const paineis = new Set(cafe.alvos.map((m) => alvoDe(m)?.id));
     expect(paineis).toEqual(new Set(['apresentacao', 'trajetoria', 'contato', 'aurora']));
+  });
+
+  it('da estação do balcão, o clique no centro do tablet chama a Aurora', () => {
+    const cafe = new CafeArea();
+    cafe.grupo.updateMatrixWorld(true);
+    const camera = new PerspectiveCamera(50, 1280 / 800, 0.1, 80);
+    camera.position.copy(ESTACOES.aurora.posicao);
+    camera.lookAt(ESTACOES.aurora.alvo);
+    camera.updateMatrixWorld();
+
+    const tablet = cafe.grupo.getObjectByName('aurora__tablet')!;
+    const centro = tablet.localToWorld(new Vector3(0, 0.3, 0)).project(camera);
+    const raycaster = new Raycaster();
+    raycaster.setFromCamera(new Vector2(centro.x, centro.y), camera);
+    const [primeiro] = raycaster.intersectObjects(cafe.alvos, false);
+
+    expect(alvoDe(primeiro?.object)).toEqual({
+      tipo: 'aurora',
+      id: 'aurora',
+      rotulo: 'Tablet · Falar com a Aurora',
+    });
+  });
+
+  it('na mesa do café, cada item recebe o próprio clique (um não tapa o outro)', () => {
+    const cafe = new CafeArea();
+    cafe.grupo.updateMatrixWorld(true);
+    // Mesma câmera da estação do café.
+    const camera = new PerspectiveCamera(50, 1280 / 800, 0.1, 80);
+    camera.position.copy(ESTACOES.cafe.posicao);
+    camera.lookAt(ESTACOES.cafe.alvo);
+    camera.updateMatrixWorld();
+    const raycaster = new Raycaster();
+
+    const itens: [string, number][] = [
+      ['apresentacao', 0.14], // notebook
+      ['trajetoria', 0.14], // cardápio (fica atrás da pasta)
+      ['contato', 0.03], // pasta
+    ];
+    for (const [id, alturaDoCentro] of itens) {
+      const item = cafe.grupo.getObjectByName(`cafe__${id}`)!;
+      const centro = item.localToWorld(new Vector3(0, alturaDoCentro, 0)).project(camera);
+      raycaster.setFromCamera(new Vector2(centro.x, centro.y), camera);
+      const [primeiro] = raycaster.intersectObjects(cafe.alvos, false);
+
+      expect(alvoDe(primeiro?.object)?.id, `clique no centro de ${id}`).toBe(id);
+    }
   });
 });

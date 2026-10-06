@@ -81,7 +81,7 @@ export class SceneEngineService {
     this.ambiente = new Ambiente(qualidade);
     this.livraria = new LivrariaArea();
     this.floricultura = new FloriculturaArea();
-    this.cafe = new CafeArea();
+    this.cafe = new CafeArea(opcoes.reduzirMovimento);
     const folhas = new Folhas(qualidade.folhas, opcoes.reduzirMovimento);
     this.partes = [this.ambiente, this.livraria, this.floricultura, this.cafe, folhas];
     this.partes.forEach((parte) => this.cena.add(parte.grupo));

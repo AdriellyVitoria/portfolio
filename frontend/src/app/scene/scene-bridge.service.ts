@@ -5,6 +5,7 @@ import { PortfolioStateService } from '../core/state/portfolio-state.service';
 import { ESTACOES } from './estacoes';
 import { detectarQualidade, prefereMenosMovimento } from './qualidade';
 import { SceneEngineService } from './scene-engine.service';
+import { resumirConversa } from './tela-aurora';
 import type { AlvoInterativo } from './tipos';
 
 export interface DicaCursor {
@@ -56,6 +57,13 @@ export class SceneBridgeService {
       this.motor.cafe?.marcarAberto(this.estado.painelCafe());
     });
     effect(() => {
+      // Tela do tablet: redesenhada só quando a conversa muda.
+      if (!this.ativo()) return;
+      this.motor.cafe?.atualizarTela(
+        resumirConversa(this.aurora.mensagens(), this.aurora.digitando()),
+      );
+    });
+    effect(() => {
       // O balcão da Aurora conta como café para os rótulos.
       const area = this.estado.areaAtual();
       this.motor.rotulos.definirArea(area === 'aurora' ? 'cafe' : area);
@@ -72,7 +80,7 @@ export class SceneBridgeService {
         aoPassar: (alvo, x, y) => {
           this.dicaCursor.set(alvo ? { rotulo: alvo.rotulo, x, y } : null);
           this.motor.cafe?.marcarSobCursor(alvo?.tipo === 'cafe' ? alvo.id : null);
-          this.motor.cafe?.marcarSinoSobCursor(alvo?.tipo === 'aurora');
+          this.motor.cafe?.marcarTabletSobCursor(alvo?.tipo === 'aurora');
         },
         aoArrastar: () => undefined,
         aoSoltar: () => undefined,

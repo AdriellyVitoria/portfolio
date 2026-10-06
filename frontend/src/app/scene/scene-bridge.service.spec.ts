@@ -15,7 +15,12 @@ class MotorFalso {
   destruir = vi.fn();
   livraria = { destacar: vi.fn(), selecionar: vi.fn() };
   floricultura = { selecionar: vi.fn() };
-  cafe = { marcarAberto: vi.fn(), marcarSobCursor: vi.fn(), marcarSinoSobCursor: vi.fn() };
+  cafe = {
+    marcarAberto: vi.fn(),
+    marcarSobCursor: vi.fn(),
+    marcarTabletSobCursor: vi.fn(),
+    atualizarTela: vi.fn(),
+  };
   rotulos = { registrar: vi.fn(), remover: vi.fn(), definirArea: vi.fn() };
   iniciar(_canvas: HTMLCanvasElement, opcoes: OpcoesMotor) {
     this.opcoes = opcoes;
@@ -71,7 +76,7 @@ describe('SceneBridgeService', () => {
       expect(estado.painelCafe()).toBe('trajetoria');
     });
 
-    it('tocar o sino leva até a Aurora e abre a conversa', () => {
+    it('tocar o tablet leva até a Aurora e abre a conversa', () => {
       motor.opcoes!.callbacks.aoSelecionar({ tipo: 'aurora', id: 'aurora', rotulo: '' });
 
       expect(estado.areaAtual()).toBe('aurora');

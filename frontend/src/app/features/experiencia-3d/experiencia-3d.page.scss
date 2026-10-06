@@ -39,6 +39,11 @@
     outline-offset: 4px;
     border-radius: var(--raio-md);
   }
+
+  // Some sem brigar com a opacidade que a cena controla (ex.: etiqueta do tablet com o chat aberto).
+  &--escondido {
+    visibility: hidden;
+  }
 }
 
 .cena {

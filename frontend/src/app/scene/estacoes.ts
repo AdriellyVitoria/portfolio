@@ -33,7 +33,8 @@ export const ESTACOES: Record<Area, Estacao> = {
   // A Aurora fica atrás do balcão do café.
   aurora: {
     area: 'aurora',
-    posicao: new Vector3(4.4, 1.7, -0.6),
-    alvo: new Vector3(5.4, 1.3, -3.9),
+    // Enquadra o tablet à esquerda; à direita fica o painel do chat.
+    posicao: new Vector3(4.55, 1.75, -1.75),
+    alvo: new Vector3(5.45, 1.25, -3.85),
   },
 };

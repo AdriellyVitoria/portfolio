@@ -69,13 +69,13 @@ describe('Experiencia3dPage', () => {
   });
 
   describe('Aurora', () => {
-    it('só pode ser chamada no café: o sino abre o painel e leva ao balcão', async () => {
+    it('só pode ser chamada no café: o tablet abre o painel e leva ao balcão', async () => {
       const { fixture, el, botao, estado } = await renderizar();
-      expect(botao('Sino')).toBeUndefined(); // fora do café não há como iniciar a conversa
+      expect(botao('Tablet')).toBeUndefined(); // fora do café não há como iniciar a conversa
 
       botao('Café').click();
       await fixture.whenStable();
-      botao('Sino').click();
+      botao('Tablet').click();
       await fixture.whenStable();
 
       expect(estado.areaAtual()).toBe('aurora');
@@ -87,7 +87,7 @@ describe('Experiencia3dPage', () => {
       const { fixture, el, botao, estado } = await renderizar();
       botao('Café').click();
       await fixture.whenStable();
-      botao('Sino').click();
+      botao('Tablet').click();
       await fixture.whenStable();
 
       botao('Livraria').click();
@@ -111,14 +111,16 @@ describe('Experiencia3dPage — placas presas à cena', () => {
     });
   });
 
-  it('tem a fachada, as três placas de seção e uma etiqueta por categoria', async () => {
+  it('tem a fachada, as três placas de seção, a etiqueta do tablet e uma por categoria', async () => {
     const fixture = TestBed.createComponent(Experiencia3dPage);
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;
 
     expect(el.querySelector('[approtulocena="fachada"], app-placa-fachada')).not.toBeNull();
     expect(el.querySelectorAll('app-placa-secao')).toHaveLength(3);
-    expect(el.querySelectorAll('app-etiqueta-skill')).toHaveLength(7);
+    const etiquetas = [...el.querySelectorAll('app-etiqueta-skill')].map((e) => e.textContent);
+    expect(etiquetas).toHaveLength(8); // 7 categorias + o tablet
+    expect(etiquetas.some((t) => t?.includes('Consulta IA'))).toBe(true);
   });
 
   it('a etiqueta de uma categoria escolhe a categoria e leva à floricultura', async () => {

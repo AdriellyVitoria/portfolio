@@ -64,7 +64,7 @@ const ESTACOES_MENU: EstacaoMenu[] = [
   {
     area: 'cafe',
     rotulo: 'Café',
-    dica: 'Notebook, cardápio e pasta: um pouco sobre mim. Toque no sino do balcão para falar com a Aurora.',
+    dica: 'Notebook, cardápio e pasta: um pouco sobre mim. Toque no tablet do balcão para falar com a Aurora.',
   },
 ];
 
@@ -119,6 +119,7 @@ export default class Experiencia3dPage {
   protected readonly estacoes = ESTACOES_MENU;
   protected readonly itensCafe = ITENS_CAFE;
   protected readonly secoes = SECOES;
+  protected readonly itensTablet = ['Pergunte à Aurora'];
   protected readonly semWebGL = signal(false);
 
   /** Área do menu (o balcão da Aurora conta como café). */

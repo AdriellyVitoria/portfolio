@@ -1,12 +1,14 @@
 import {
+  CanvasTexture,
   Color,
   CylinderGeometry,
   Group,
   MathUtils,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   PlaneGeometry,
-  SphereGeometry,
+  SRGBColorSpace,
   TorusGeometry,
   Vector3,
 } from 'three';
@@ -14,6 +16,7 @@ import {
 import type { PainelCafe } from '../../core/models';
 import { PALETA } from '../paleta';
 import type { AncoraRotulo } from '../rotulos';
+import { type TelaAurora, desenharTelaAurora } from '../tela-aurora';
 import type { ParteCena } from '../tipos';
 import {
   caixa,
@@ -25,6 +28,9 @@ import {
 } from '../util';
 
 const MESA = { x: 4.7, z: -1.6, altura: 0.76 };
+/** Base do tablet no balcão (coordenadas do mundo). */
+const POSICAO_TABLET = new Vector3(5.0, 1.06, -3.78);
+const ESCALA_TABLET = 1.25;
 
 interface ItemMesa {
   id: PainelCafe;
@@ -40,18 +46,28 @@ export class CafeArea implements ParteCena {
   private readonly itens: ItemMesa[] = [];
   private aberto: PainelCafe | null = null;
   private sobCursor: PainelCafe | null = null;
-  /** Sino do balcão: chama a Aurora. Pulsa sempre, para ser encontrado. */
-  private readonly materialSino = new MeshStandardMaterial({
+  // Tablet "Consulta IA · Aurora" no balcão: a entrada para a conversa.
+  private readonly materialBorda = new MeshStandardMaterial({
     color: PALETA.amarelo,
-    emissive: new Color(PALETA.amarelo),
-    emissiveIntensity: 0.2,
-    metalness: 0.6,
-    roughness: 0.35,
+    emissive: new Color(PALETA.luzQuente),
+    emissiveIntensity: 0.6,
   });
-  private sinoSobCursor = false;
+  private readonly canvasTela =
+    typeof document === 'undefined' ? null : document.createElement('canvas');
+  private readonly ctxTela = this.canvasTela?.getContext('2d') ?? null;
+  private readonly texturaTela = this.ctxTela ? new CanvasTexture(this.canvasTela!) : null;
+  private tabletSobCursor = false;
 
-  constructor() {
+  /** `semPulso`: com movimento reduzido, a borda do tablet não pulsa. */
+  constructor(private readonly semPulso = false) {
     this.grupo.name = 'cafe';
+    if (this.canvasTela && this.texturaTela) {
+      this.canvasTela.width = 512;
+      this.canvasTela.height = 350;
+      this.texturaTela.colorSpace = SRGBColorSpace;
+      this.texturaTela.anisotropy = 4;
+      this.atualizarTela({ modo: 'convite' });
+    }
     this.montarBalcao();
     this.montarMesa();
     this.montarItens();
@@ -69,7 +85,21 @@ export class CafeArea implements ParteCena {
         areas: ['livraria', 'floricultura', 'cafe', 'aurora'],
         distanciaReferencia: 7.5,
       },
+      {
+        id: 'tablet-aurora',
+        posicao: POSICAO_TABLET.clone().add(new Vector3(0, 0.5 * ESCALA_TABLET, 0)),
+        alinhamento: 'base',
+        areas: ['cafe', 'aurora'],
+        distanciaReferencia: 4,
+      },
     ];
+  }
+
+  /** Redesenha a tela do tablet (chamado só quando a conversa muda). */
+  atualizarTela(tela: TelaAurora): void {
+    if (!this.ctxTela || !this.texturaTela) return;
+    desenharTelaAurora(this.ctxTela, tela);
+    this.texturaTela.needsUpdate = true;
   }
 
   /** Destaca o item cujo painel está aberto. */
@@ -81,8 +111,8 @@ export class CafeArea implements ParteCena {
     this.sobCursor = painel;
   }
 
-  marcarSinoSobCursor(sobCursor: boolean): void {
-    this.sinoSobCursor = sobCursor;
+  marcarTabletSobCursor(sobCursor: boolean): void {
+    this.tabletSobCursor = sobCursor;
   }
 
   update(dt: number, tempo: number): void {
@@ -96,9 +126,9 @@ export class CafeArea implements ParteCena {
       item.brilho = MathUtils.lerp(item.brilho, ativo ? 0.45 : convite, suavidade);
       item.materiais.forEach((m) => (m.emissiveIntensity = item.brilho));
     }
-    this.materialSino.emissiveIntensity = this.sinoSobCursor
-      ? 0.7
-      : 0.2 + (Math.sin(tempo * 2.4) + 1) * 0.15;
+    // Borda acesa do tablet: pulso leve para convidar; mais forte no hover.
+    const pulso = this.semPulso ? 0.15 : (Math.sin(tempo * 2.2) + 1) * 0.35;
+    this.materialBorda.emissiveIntensity = this.tabletSobCursor ? 1.4 : 0.5 + pulso;
   }
 
   private montarBalcao(): void {
@@ -141,7 +171,7 @@ export class CafeArea implements ParteCena {
     );
     pote.position.set(1.15, 1.2, 0);
     balcao.add(pote);
-    balcao.add(this.montarSino());
+    balcao.add(this.montarTablet());
     this.grupo.add(balcao);
 
     // Lousa na parede.
@@ -162,54 +192,52 @@ export class CafeArea implements ParteCena {
     this.grupo.add(caixa(2.32, 0.87, 0.04, materialFosco(PALETA.madeira), 5.2, 2.15, -5.0), lousa);
   }
 
-  /** Sino de balcão + plaquinha "Fale com a Aurora" (abre a conversa). */
-  private montarSino(): Group {
-    const sino = marcarDinamico(new Group());
-    sino.position.set(-0.2, 1.06, 0.17);
-    const base = new Mesh(
-      new CylinderGeometry(0.07, 0.08, 0.02, 16),
-      materialFosco(PALETA.marromEscuro),
-    );
+  /** Tablet em pé no balcão, com a tela "Consulta IA · Aurora" (abre a conversa). */
+  private montarTablet(): Group {
+    const tablet = marcarDinamico(new Group());
+    tablet.position.copy(POSICAO_TABLET).sub(new Vector3(5.2, 0, -3.9)); // local ao balcão
+    // Virado para a câmera do balcão (estação "aurora") e um pouco maior, para chamar atenção.
+    tablet.rotation.y = -0.19;
+    tablet.scale.setScalar(ESCALA_TABLET);
+
+    const escuro = materialFosco(0x2b1d16, { roughness: 0.5 });
+    const base = new Mesh(new CylinderGeometry(0.08, 0.095, 0.02, 20), escuro);
     base.position.y = 0.01;
-    const cupula = new Mesh(
-      new SphereGeometry(0.06, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-      this.materialSino,
-    );
-    cupula.position.y = 0.02;
-    const botao = new Mesh(new SphereGeometry(0.015, 8, 6), this.materialSino);
-    botao.position.y = 0.09;
-    sino.add(base, cupula, botao);
+    const haste = caixa(0.03, 0.2, 0.03, escuro, 0, 0.11, -0.03);
+    tablet.add(base, haste);
 
-    const textura = texturaDeTexto('Fale com a Aurora', {
-      largura: 512,
-      altura: 160,
-      fundo: '#3f5634',
-      cor: '#f6ecdb',
-      fonte: '600 64px "Fraunces Variable", Georgia, serif',
-    });
-    if (textura) {
-      const placa = new Mesh(
-        new PlaneGeometry(0.3, 0.094),
-        new MeshStandardMaterial({ map: textura }),
+    // Corpo inclinado para trás, borda acesa e a tela.
+    const corpo = new Group();
+    corpo.position.set(0, 0.3, 0);
+    corpo.rotation.x = -0.35;
+    corpo.add(caixa(0.44, 0.31, 0.025, escuro, 0, 0, 0));
+    const borda = caixa(0.405, 0.282, 0.004, this.materialBorda, 0, 0, 0.0125);
+    borda.castShadow = false;
+    corpo.add(borda);
+    if (this.texturaTela) {
+      const tela = new Mesh(
+        new PlaneGeometry(0.38, 0.26),
+        // Sem iluminação: a tela fica sempre legível, como uma tela de verdade.
+        new MeshBasicMaterial({ map: this.texturaTela, color: 0xfff6e8 }),
       );
-      placa.position.set(0.24, 0.07, 0.02);
-      placa.rotation.x = -0.25;
-      sino.add(placa);
+      tela.position.z = 0.0152;
+      corpo.add(tela);
     }
+    tablet.add(corpo);
 
-    // Área de clique generosa em volta do sino e da placa.
-    const area = caixa(0.6, 0.25, 0.25, new MeshStandardMaterial({ visible: false }), 0.12, 0.1, 0);
+    // Área de clique: tablet e base.
+    const area = caixa(0.52, 0.5, 0.3, new MeshStandardMaterial({ visible: false }), 0, 0.25, 0);
     area.castShadow = false;
-    sino.add(area);
-    sino.name = 'aurora__sino';
+    tablet.add(area);
+    tablet.name = 'aurora__tablet';
     this.alvos.push(
-      ...marcarInterativo(sino, {
+      ...marcarInterativo(tablet, {
         tipo: 'aurora',
         id: 'aurora',
-        rotulo: 'Sino · Falar com a Aurora',
+        rotulo: 'Tablet · Falar com a Aurora',
       }),
     );
-    return sino;
+    return tablet;
   }
 
   private montarMesa(): void {
@@ -267,7 +295,10 @@ export class CafeArea implements ParteCena {
     notebook.add(telaGrupo);
     notebook.position.set(MESA.x - 0.2, y, MESA.z - 0.1);
     notebook.rotation.y = 0.3;
-    this.adicionarItem('apresentacao', 'Notebook · Apresentação', notebook, [corpo, tela]);
+    this.adicionarItem('apresentacao', 'Notebook · Apresentação', notebook, [corpo, tela], {
+      tamanho: [0.46, 0.3, 0.36],
+      centro: [0, 0.14, -0.04],
+    });
 
     // Cardápio em pé (formato de tenda).
     const cardapio = new Group();
@@ -280,7 +311,10 @@ export class CafeArea implements ParteCena {
     });
     cardapio.position.set(MESA.x + 0.3, y, MESA.z - 0.25);
     cardapio.rotation.y = -0.4;
-    this.adicionarItem('trajetoria', 'Cardápio · Trajetória', cardapio, [papel, capa]);
+    this.adicionarItem('trajetoria', 'Cardápio · Trajetória', cardapio, [papel, capa], {
+      tamanho: [0.28, 0.32, 0.2],
+      centro: [0, 0.14, 0],
+    });
 
     // Pasta (currículo).
     const pasta = new Group();
@@ -291,7 +325,11 @@ export class CafeArea implements ParteCena {
     );
     pasta.position.set(MESA.x + 0.15, y, MESA.z + 0.3);
     pasta.rotation.y = 0.2;
-    this.adicionarItem('contato', 'Pasta · Contato e currículo', pasta, [couro]);
+    // A pasta é baixinha: área rente à mesa, para não tapar o cardápio logo atrás.
+    this.adicionarItem('contato', 'Pasta · Contato e currículo', pasta, [couro], {
+      tamanho: [0.4, 0.09, 0.3],
+      centro: [0, 0.04, 0],
+    });
 
     // Xícara de café, só decoração.
     this.grupo.add(this.xicara(materialFosco(PALETA.cremeClaro), MESA.x - 0.35, y, MESA.z + 0.3));
@@ -312,9 +350,14 @@ export class CafeArea implements ParteCena {
     rotulo: string,
     grupo: Group,
     materiais: MeshStandardMaterial[],
+    clique: { tamanho: [number, number, number]; centro: [number, number, number] },
   ): void {
-    // Caixa invisível maior que o objeto: alvo de clique/toque mais generoso.
-    const area = caixa(0.46, 0.36, 0.42, new MeshStandardMaterial({ visible: false }), 0, 0.15, 0);
+    // Caixa invisível um pouco maior que o objeto (alvo de toque mais generoso), mas do
+    // tamanho de cada item: uma caixa genérica e alta tapava os itens que estão atrás.
+    const [largura, altura, profundidade] = clique.tamanho;
+    const [cx, cy, cz] = clique.centro;
+    const invisivel = new MeshStandardMaterial({ visible: false });
+    const area = caixa(largura, altura, profundidade, invisivel, cx, cy, cz);
     area.castShadow = false;
     grupo.add(area);
     this.alvos.push(...marcarInterativo(grupo, { tipo: 'cafe', id, rotulo }));
