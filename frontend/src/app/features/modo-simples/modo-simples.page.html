@@ -24,6 +24,7 @@
       <div class="hero__acoes">
         <a app-botao routerLink="/simples" fragment="livraria">Ver projetos</a>
         <a app-botao variante="secundario" routerLink="/simples" fragment="contato">Contato</a>
+        <a app-botao variante="texto" routerLink="/simples" fragment="aurora">Pergunte à Aurora</a>
       </div>
     </section>
   } @else {
@@ -57,6 +58,17 @@
         <h2 id="titulo-cafe" class="secao__titulo">Sobre mim</h2>
       </header>
       <app-sobre [perfil]="p" />
+
+      <section id="aurora" class="aurora" aria-labelledby="titulo-aurora">
+        <div class="aurora__texto">
+          <h3 id="titulo-aurora" class="aurora__titulo">Converse com a Aurora</h3>
+          <p>
+            A Aurora é a guia deste café. Ela responde com o que está neste portfólio e te leva até
+            a parte certa da página.
+          </p>
+        </div>
+        <app-aurora-chat variante="inline" />
+      </section>
     </section>
 
     <section id="contato" class="secao secao--contato" aria-labelledby="titulo-contato">
@@ -75,3 +87,7 @@
 
 <!-- Painel de projeto (rota filha /simples/projetos/:id) -->
 <router-outlet />
+
+@if (aurora.recolhida()) {
+  <app-aurora-pilula class="pilula-aurora" (voltar)="voltarParaAurora()" />
+}

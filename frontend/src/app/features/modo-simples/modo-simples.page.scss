@@ -171,3 +171,33 @@
   font-size: var(--texto-sm);
   text-align: center;
 }
+
+.aurora {
+  display: grid;
+  gap: var(--esp-6);
+  margin-top: var(--esp-12);
+  scroll-margin-top: calc(var(--altura-topo) + var(--esp-4));
+
+  @include a-partir-de($bp-lg) {
+    grid-template-columns: 1fr 1.4fr;
+    align-items: start;
+  }
+
+  &__texto {
+    display: grid;
+    gap: var(--esp-2);
+    color: var(--texto-suave);
+  }
+
+  &__titulo {
+    color: var(--cor-verde-escuro);
+    font-size: var(--texto-xl);
+  }
+}
+
+.pilula-aurora {
+  position: fixed;
+  z-index: 6;
+  right: var(--esp-4);
+  bottom: var(--esp-4);
+}
