@@ -1,5 +1,4 @@
 import {
-  CanvasTexture,
   CircleGeometry,
   CylinderGeometry,
   Group,
@@ -7,13 +6,9 @@ import {
   LatheGeometry,
   MathUtils,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
-  OctahedronGeometry,
-  PlaneGeometry,
   PointLight,
   Quaternion,
-  SRGBColorSpace,
   SphereGeometry,
   TorusGeometry,
   Vector2,
@@ -22,6 +17,7 @@ import {
 
 import { CATEGORIAS_SKILL, type CategoriaSkill, type Skill } from '../../core/models';
 import { PALETA } from '../paleta';
+import type { AncoraRotulo } from '../rotulos';
 import type { ParteCena } from '../tipos';
 import {
   caixa,
@@ -30,7 +26,6 @@ import {
   marcarDinamico,
   marcarInterativo,
   materialFosco,
-  texturaDeTexto,
 } from '../util';
 
 // Os vasos ficam num arco aberto, voltado para quem chega (centro, raio e ângulos do arco).
@@ -41,9 +36,10 @@ const ANGULO_FINAL = MathUtils.degToRad(344);
 /** Para onde vasos e placas olham (a câmera da estação fica por aí). */
 const OLHAR_PARA = new Vector3(0, 0, 3);
 
-const LARGURA_PLACA = 0.8;
-const BASE_PLACA = 1.05; // altura da placa acima da base do vaso
-const DEGRAU_PLACA = 0.38; // placas alternam alto/baixo para não se cobrirem
+/** Onde a etiqueta de skills (HTML) encosta: logo acima das flores. */
+const ALTURA_ETIQUETA = 1.0;
+/** Estações internas: de onde as placas de seção podem ser vistas. */
+const AREAS_INTERNAS = ['livraria', 'floricultura', 'cafe', 'aurora'] as const;
 
 /** Cor das flores de cada categoria (detalhes em rosa/lilás, como pede a paleta). */
 const COR_FLOR: Record<CategoriaSkill, number> = {
@@ -70,14 +66,12 @@ interface Materiais {
 interface Canteiro {
   categoria: CategoriaSkill;
   base: Vector3;
-  topoPlaca: number;
 }
 
 /**
- * Floricultura: um vaso florido por categoria de skills, com uma placa de madeira
- * listando as tecnologias. Tocar num vaso escolhe a categoria (o HUD mostra as skills).
- * Tudo que é estático é fundido por material; a categoria escolhida ganha halo,
- * luz e um marcador sobre a placa.
+ * Floricultura: um vaso florido por categoria de skills. As etiquetas com as tecnologias
+ * são HTML preso a cada vaso (ver ancoras()). Tocar num vaso escolhe a categoria.
+ * Tudo que é estático é fundido por material; a categoria escolhida ganha halo e luz.
  */
 export class FloriculturaArea implements ParteCena {
   readonly grupo = new Group();
@@ -95,7 +89,6 @@ export class FloriculturaArea implements ParteCena {
     transparent: true,
     opacity: 0.85,
   });
-  private readonly marcador: Mesh;
   private readonly luz = new PointLight(PALETA.luzQuente, 0, 2.6, 1.2);
   private intensidade = 0;
 
@@ -105,13 +98,9 @@ export class FloriculturaArea implements ParteCena {
     const disco = new Mesh(new CircleGeometry(0.42, 24), this.halo);
     disco.rotation.x = -Math.PI / 2;
     disco.position.y = 0.006;
-    this.marcador = new Mesh(
-      new OctahedronGeometry(0.09, 0),
-      new MeshBasicMaterial({ color: PALETA.amarelo }),
-    );
-    // Baixa e à frente: ilumina vaso e planta, não a placa (que ficaria lavada).
+    // Baixa e à frente: ilumina vaso e planta.
     this.luz.position.set(0, 0.55, 0.5);
-    this.destaque.add(disco, this.marcador, this.luz);
+    this.destaque.add(disco, this.luz);
     this.destaque.visible = false;
 
     this.grupo.add(this.estatico, this.cliques, this.destaque);
@@ -160,39 +149,33 @@ export class FloriculturaArea implements ParteCena {
         elevacao,
         CENTRO_ARCO.z + Math.sin(angulo) * RAIO_ARCO,
       );
-      const alturaPlaca = BASE_PLACA + (i % 2) * DEGRAU_PLACA;
-      this.montarCanteiro(
-        categoria.id,
-        categoria.rotulo,
-        categoria.skills,
-        base,
-        alturaPlaca,
-        materiais,
-      );
+      this.montarCanteiro(categoria.id, categoria.rotulo, base, materiais);
     });
 
-    this.montarPlacaDaParede();
     fundirEstaticos(this.estatico);
   }
 
-  /** Placa "Floricultura · Skills" na parede, no mesmo estilo da "Livraria · Projetos". */
-  private montarPlacaDaParede(): void {
-    const largura = 2.1;
-    const altura = 0.36;
-    const textura = texturaDeTexto('Floricultura · Skills', {
-      largura: 512,
-      altura: Math.round((512 * altura) / largura),
-      fundo: '#3f5634',
-      cor: '#f6ecdb',
-      fonte: `600 ${Math.round(((512 * altura) / largura) * 0.55)}px "Fraunces Variable", Georgia, serif`,
-    });
-    if (!textura) return;
-    const placa = new Mesh(
-      new PlaneGeometry(largura, altura),
-      new MeshStandardMaterial({ map: textura }),
-    );
-    placa.position.set(CENTRO_ARCO.x, 2.85, -4.96);
-    this.estatico.add(placa);
+  /**
+   * Âncoras dos rótulos HTML: a placa da seção na parede e uma etiqueta por vaso
+   * (as etiquetas só aparecem na própria floricultura).
+   */
+  ancoras(): AncoraRotulo[] {
+    return [
+      {
+        id: 'secao-floricultura',
+        posicao: new Vector3(CENTRO_ARCO.x, 2.78, -4.9),
+        alinhamento: 'base',
+        areas: AREAS_INTERNAS,
+        distanciaReferencia: 6,
+      },
+      ...this.canteiros.map(({ categoria, base }) => ({
+        id: `categoria-${categoria}`,
+        posicao: base.clone().add(new Vector3(0, ALTURA_ETIQUETA, 0)),
+        alinhamento: 'base' as const,
+        areas: ['floricultura'] as const,
+        distanciaReferencia: 3.6,
+      })),
+    ];
   }
 
   /** Destaca o vaso da categoria (ou nenhum, com `null`). */
@@ -207,21 +190,17 @@ export class FloriculturaArea implements ParteCena {
 
     if (canteiro) {
       this.destaque.position.copy(canteiro.base);
-      this.marcador.position.y = canteiro.topoPlaca + 0.16 + Math.sin(tempo * 2.5) * 0.04;
     }
     this.destaque.visible = this.intensidade > 0.02;
     this.luz.intensity = this.intensidade * 2.5;
     this.halo.opacity = 0.75 * this.intensidade;
     this.halo.emissiveIntensity = 0.6 + Math.sin(tempo * 3) * 0.2;
-    this.marcador.rotation.y = tempo * 1.5;
   }
 
   private montarCanteiro(
     categoria: CategoriaSkill,
     rotulo: string,
-    skills: Skill[],
     base: Vector3,
-    basePlaca: number,
     m: Materiais,
   ): void {
     const canteiro = new Group();
@@ -238,13 +217,11 @@ export class FloriculturaArea implements ParteCena {
 
     this.montarVaso(canteiro, m);
     this.montarPlanta(canteiro, categoria, m);
-    const alturaPlaca = this.montarPlaca(canteiro, rotulo, skills, basePlaca, m);
     this.estatico.add(canteiro);
 
-    // Área de clique: vaso, planta e placa (invisível; só o raycasting a enxerga).
-    const topo = basePlaca + alturaPlaca;
-    const area = new Mesh(new CylinderGeometry(0.42, 0.42, topo + 0.1, 10), m.invisivel);
-    area.position.set(base.x, base.y + (topo + 0.1) / 2, base.z);
+    // Área de clique: vaso e planta (invisível; só o raycasting a enxerga).
+    const area = new Mesh(new CylinderGeometry(0.4, 0.4, ALTURA_ETIQUETA, 10), m.invisivel);
+    area.position.set(base.x, base.y + ALTURA_ETIQUETA / 2, base.z);
     area.name = `vaso__${categoria}`;
     this.alvosMeshes.push(
       ...marcarInterativo(area, {
@@ -254,7 +231,7 @@ export class FloriculturaArea implements ParteCena {
       }),
     );
     this.cliques.add(area);
-    this.canteiros.push({ categoria, base, topoPlaca: topo });
+    this.canteiros.push({ categoria, base });
   }
 
   /** Vaso torneado (perfil girado em volta do eixo), com borda e faixa creme. */
@@ -348,41 +325,6 @@ export class FloriculturaArea implements ParteCena {
       canteiro.add(flor);
     }
   }
-
-  /** Placa de madeira sobre duas hastes, com a categoria e as skills. Devolve a altura. */
-  private montarPlaca(
-    canteiro: Group,
-    rotulo: string,
-    skills: Skill[],
-    basePlaca: number,
-    m: Materiais,
-  ): number {
-    const textura = texturaDaPlaca(
-      rotulo,
-      skills.map((s) => s.nome),
-    );
-    const altura = textura ? LARGURA_PLACA * textura.proporcao : 0.4;
-    const z = -0.16; // atrás da planta
-    [-0.31, 0.31].forEach((x) => {
-      const haste = new Mesh(new CylinderGeometry(0.012, 0.012, basePlaca - 0.32), m.madeira);
-      haste.position.set(x, 0.32 + (basePlaca - 0.32) / 2, z);
-      canteiro.add(haste);
-    });
-    canteiro.add(
-      caixa(LARGURA_PLACA + 0.05, altura + 0.05, 0.03, m.madeira, 0, basePlaca + altura / 2, z),
-    );
-    if (textura) {
-      const placa = new Mesh(
-        new PlaneGeometry(LARGURA_PLACA, altura),
-        // Material sem iluminação: a placa mantém o contraste como uma etiqueta impressa,
-        // mesmo com a luz do destaque ou na sombra.
-        new MeshBasicMaterial({ map: textura.textura, color: 0xfff1d8 }),
-      );
-      placa.position.set(0, basePlaca + altura / 2, z + 0.017);
-      canteiro.add(placa);
-    }
-    return altura;
-  }
 }
 
 /** Gerador pseudoaleatório com semente (a mesma categoria sempre gera a mesma planta). */
@@ -392,68 +334,4 @@ function sementeAleatoria(texto: string): () => number {
     estado = (estado * 1664525 + 1013904223) >>> 0;
     return estado / 4294967296;
   };
-}
-
-/**
- * Placa da categoria: título e skills separadas por "·", quebrando linhas.
- * Devolve `null` onde não há canvas 2D (ex.: testes em jsdom).
- */
-function texturaDaPlaca(
-  titulo: string,
-  itens: string[],
-): { textura: CanvasTexture; proporcao: number } | null {
-  if (typeof document === 'undefined') return null;
-  const largura = 512;
-  const margem = 26;
-  const fonteItens = '600 34px "Inter Variable", system-ui, sans-serif';
-  const medir = document.createElement('canvas').getContext('2d');
-  if (!medir) return null;
-
-  medir.font = fonteItens;
-  const linhas: string[] = [];
-  let atual = '';
-  for (const item of itens) {
-    const tentativa = atual ? `${atual} · ${item}` : item;
-    if (medir.measureText(tentativa).width > largura - margem * 2 && atual) {
-      linhas.push(atual);
-      atual = item;
-    } else {
-      atual = tentativa;
-    }
-  }
-  if (atual) linhas.push(atual);
-
-  const alturaTitulo = 54;
-  const alturaLinha = 42;
-  const altura = margem + alturaTitulo + 10 + linhas.length * alturaLinha + margem - 6;
-  const canvas = document.createElement('canvas');
-  canvas.width = largura;
-  canvas.height = altura;
-  const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#fbf6ee';
-  ctx.fillRect(0, 0, largura, altura);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-
-  // Título: diminui a fonte até caber (ex.: "Arquitetura, testes e métodos").
-  const textoTitulo = titulo.toUpperCase();
-  let tamanho = 48;
-  ctx.font = `700 ${tamanho}px "Fraunces Variable", Georgia, serif`;
-  while (tamanho > 26 && ctx.measureText(textoTitulo).width > largura - margem * 2) {
-    tamanho -= 2;
-    ctx.font = `700 ${tamanho}px "Fraunces Variable", Georgia, serif`;
-  }
-  ctx.fillStyle = '#8a3a22';
-  ctx.fillText(textoTitulo, largura / 2, margem + (alturaTitulo - tamanho) / 2);
-
-  ctx.fillStyle = '#24160f';
-  ctx.font = fonteItens;
-  linhas.forEach((linha, i) =>
-    ctx.fillText(linha, largura / 2, margem + alturaTitulo + 10 + i * alturaLinha),
-  );
-
-  const textura = new CanvasTexture(canvas);
-  textura.colorSpace = SRGBColorSpace;
-  textura.anisotropy = 4;
-  return { textura, proporcao: altura / largura };
 }

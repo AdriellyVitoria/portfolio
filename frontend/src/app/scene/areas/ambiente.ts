@@ -16,12 +16,14 @@ import {
   PlaneGeometry,
   PointLight,
   SphereGeometry,
+  Vector3,
 } from 'three';
 
 import { PALETA } from '../paleta';
 import type { ConfigQualidade } from '../qualidade';
+import type { AncoraRotulo } from '../rotulos';
 import type { ParteCena } from '../tipos';
-import { caixa, fundirEstaticos, marcarDinamico, materialFosco, texturaDeTexto } from '../util';
+import { caixa, fundirEstaticos, marcarDinamico, materialFosco } from '../util';
 
 const FACHADA_Z = 4;
 const LARGURA = 16;
@@ -46,6 +48,19 @@ export class Ambiente implements ParteCena {
     this.montarDecoracao();
     this.montarLuzes(qualidade);
     fundirEstaticos(this.grupo);
+  }
+
+  /** Placa da fachada (HTML): só aparece da rua. */
+  ancoras(): AncoraRotulo[] {
+    return [
+      {
+        id: 'fachada',
+        posicao: new Vector3(0, ALTURA - 0.42, FACHADA_Z + 0.2),
+        alinhamento: 'centro',
+        areas: ['entrada'],
+        distanciaReferencia: 7.5,
+      },
+    ];
   }
 
   update(_dt: number, tempo: number): void {
@@ -186,22 +201,7 @@ export class Ambiente implements ParteCena {
       );
     });
 
-    // Placa sobre a porta.
-    const textura = texturaDeTexto('Café · Livraria · Floricultura', {
-      largura: 1024,
-      altura: 160,
-      fundo: '#3f5634',
-      cor: '#f6ecdb',
-      fonte: '600 76px "Fraunces Variable", Georgia, serif',
-    });
-    const placa = new Mesh(
-      new PlaneGeometry(4.6, 0.72),
-      textura
-        ? new MeshStandardMaterial({ map: textura, roughness: 0.7 })
-        : materialFosco(PALETA.verdeEscuro),
-    );
-    placa.position.set(0, ALTURA - 0.42, FACHADA_Z + 0.17);
-    this.grupo.add(placa);
+    // A placa sobre a porta é HTML preso a esta posição (ver ancoras()).
 
     // Toldo listrado acima da placa.
     const listras = [PALETA.terracota, PALETA.creme];

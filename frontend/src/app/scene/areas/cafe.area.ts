@@ -8,10 +8,12 @@ import {
   PlaneGeometry,
   SphereGeometry,
   TorusGeometry,
+  Vector3,
 } from 'three';
 
 import type { PainelCafe } from '../../core/models';
 import { PALETA } from '../paleta';
+import type { AncoraRotulo } from '../rotulos';
 import type { ParteCena } from '../tipos';
 import {
   caixa,
@@ -54,6 +56,20 @@ export class CafeArea implements ParteCena {
     this.montarMesa();
     this.montarItens();
     fundirEstaticos(this.grupo);
+  }
+
+  /** Placa "Café" (HTML), pendurada acima da lousa. */
+  ancoras(): AncoraRotulo[] {
+    return [
+      {
+        id: 'secao-cafe',
+        // Pela base, logo acima da lousa.
+        posicao: new Vector3(5.2, 2.62, -4.85),
+        alinhamento: 'base',
+        areas: ['livraria', 'floricultura', 'cafe', 'aurora'],
+        distanciaReferencia: 7.5,
+      },
+    ];
   }
 
   /** Destaca o item cujo painel está aberto. */

@@ -55,6 +55,11 @@ export class SceneBridgeService {
       if (!this.ativo()) return;
       this.motor.cafe?.marcarAberto(this.estado.painelCafe());
     });
+    effect(() => {
+      // O balcão da Aurora conta como café para os rótulos.
+      const area = this.estado.areaAtual();
+      this.motor.rotulos.definirArea(area === 'aurora' ? 'cafe' : area);
+    });
   }
 
   conectar(canvas: HTMLCanvasElement): void {
@@ -75,6 +80,15 @@ export class SceneBridgeService {
       aoPrimeiroFrame: () => this.pronto.set(true),
     });
     this.ativo.set(true);
+  }
+
+  /** Prende um elemento HTML (placa, etiqueta) à âncora de mesmo id na cena. */
+  registrarRotulo(id: string, elemento: HTMLElement): void {
+    this.motor.rotulos.registrar(id, elemento);
+  }
+
+  removerRotulo(id: string): void {
+    this.motor.rotulos.remover(id);
   }
 
   desconectar(): void {

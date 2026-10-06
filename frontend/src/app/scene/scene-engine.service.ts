@@ -19,6 +19,7 @@ import { CameraDirector } from './camera-director';
 import type { Estacao } from './estacoes';
 import { type CallbacksInteracao, Interacao } from './interaction';
 import type { ConfigQualidade } from './qualidade';
+import { RotulosCena } from './rotulos';
 import type { ParteCena } from './tipos';
 import { descartar } from './util';
 
@@ -53,6 +54,9 @@ export class SceneEngineService {
   private ultimoInstante = 0;
   private tempo = 0;
   private aoPrimeiroFrame?: () => void;
+
+  /** Placas e etiquetas HTML presas a pontos da cena. */
+  readonly rotulos = new RotulosCena();
 
   livraria?: LivrariaArea;
   floricultura?: FloriculturaArea;
@@ -91,6 +95,7 @@ export class SceneEngineService {
       aoSoltar: () => this.director?.soltar(),
     });
     this.atualizarAlvos();
+    this.atualizarAncoras();
 
     this.observadorTamanho = new ResizeObserver(() => this.redimensionar(canvas));
     this.observadorTamanho.observe(canvas);
@@ -106,6 +111,7 @@ export class SceneEngineService {
     this.livraria?.montar(projetos);
     this.floricultura?.montar(skills);
     this.atualizarAlvos();
+    this.atualizarAncoras();
   }
 
   irPara(estacao: Estacao): void {
@@ -125,6 +131,15 @@ export class SceneEngineService {
     this.renderer?.forceContextLoss();
     this.renderer = undefined;
     this.partes = [];
+  }
+
+  private atualizarAncoras(): void {
+    this.rotulos.definirAncoras([
+      ...(this.ambiente?.ancoras() ?? []),
+      ...(this.livraria?.ancoras() ?? []),
+      ...(this.floricultura?.ancoras() ?? []),
+      ...(this.cafe?.ancoras() ?? []),
+    ]);
   }
 
   private atualizarAlvos(): void {
@@ -154,6 +169,8 @@ export class SceneEngineService {
       parte.update(dt, this.tempo);
     }
     this.renderer?.render(this.cena, this.camera);
+    const canvas = this.renderer?.domElement;
+    if (canvas) this.rotulos.atualizar(this.camera, canvas.clientWidth, canvas.clientHeight);
 
     if (this.aoPrimeiroFrame) {
       this.aoPrimeiroFrame();

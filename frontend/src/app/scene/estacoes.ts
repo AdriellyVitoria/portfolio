@@ -21,15 +21,15 @@ export const ESTACOES: Record<Area, Estacao> = {
   entrada: { area: 'entrada', posicao: new Vector3(0, 2.0, 11), alvo: new Vector3(0, 1.5, 0) },
   livraria: {
     area: 'livraria',
-    posicao: new Vector3(-4.3, 1.75, -0.9),
-    alvo: new Vector3(-5.2, 1.4, -4.8),
+    posicao: new Vector3(-4.2, 1.85, -0.2),
+    alvo: new Vector3(-5.2, 1.6, -4.8),
   },
   floricultura: {
     area: 'floricultura',
     posicao: new Vector3(0, 1.95, 1.5),
     alvo: new Vector3(0, 1.1, -2.9),
   },
-  cafe: { area: 'cafe', posicao: new Vector3(3.9, 1.8, 1.2), alvo: new Vector3(4.9, 0.85, -2.2) },
+  cafe: { area: 'cafe', posicao: new Vector3(3.9, 1.85, 1.4), alvo: new Vector3(4.9, 1.05, -2.2) },
   // A Aurora fica atrás do balcão do café.
   aurora: {
     area: 'aurora',

@@ -5,6 +5,46 @@
   aria-label="Cena 3D de um café, livraria e floricultura de outono. Use o menu de estações para navegar."
 ></canvas>
 
+<!-- Placas e etiquetas: HTML preso a pontos da cena (a cena posiciona cada uma a cada frame). -->
+<div class="rotulos" [class.rotulos--oculto]="semWebGL() || !ponte.pronto()">
+  <div class="rotulo" appRotuloCena="fachada">
+    <app-placa-fachada titulo="Café · Livraria · Floricultura" subtitulo="Portfólio de Adrielly" />
+  </div>
+
+  @for (secao of secoes; track secao.area) {
+    <button
+      type="button"
+      class="rotulo"
+      [appRotuloCena]="'secao-' + secao.area"
+      [attr.aria-label]="'Ir para ' + secao.titulo"
+      (click)="estado.irPara(secao.area)"
+    >
+      <app-placa-secao
+        [titulo]="secao.titulo"
+        [subtitulo]="secao.subtitulo"
+        [icone]="secao.icone"
+      />
+    </button>
+  }
+
+  @for (categoria of categoriasEtiquetas(); track categoria.id) {
+    <button
+      type="button"
+      class="rotulo"
+      [appRotuloCena]="'categoria-' + categoria.id"
+      [attr.aria-pressed]="estado.categoriaSkill() === categoria.id"
+      [attr.aria-label]="categoria.rotulo + ': ' + categoria.nomes.join(', ')"
+      (click)="escolherCategoria(categoria.id)"
+    >
+      <app-etiqueta-skill
+        [titulo]="categoria.rotulo"
+        [itens]="categoria.nomes"
+        [ativa]="estado.categoriaSkill() === categoria.id"
+      />
+    </button>
+  }
+</div>
+
 <header class="topo">
   <a class="topo__marca" routerLink="/simples">{{ perfil()?.nome ?? 'Portfólio' }}</a>
   <a class="topo__link" routerLink="/simples">Versão simples</a>

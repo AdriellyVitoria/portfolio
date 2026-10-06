@@ -21,7 +21,8 @@ describe('Experiencia3dPage', () => {
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;
     const botao = (texto: string) =>
-      [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      // Ignora as placas presas à cena (.rotulo): o teste usa o HUD e o menu.
+      [...el.querySelectorAll<HTMLButtonElement>('button:not(.rotulo)')].find((b) =>
         b.textContent?.trim().startsWith(texto),
       )!;
     return { fixture, el, botao, estado: TestBed.inject(PortfolioStateService) };
@@ -98,5 +99,42 @@ describe('Experiencia3dPage', () => {
       expect(estado.areaAtual()).toBe('aurora');
       expect(el.querySelector('app-aurora-chat')).not.toBeNull();
     });
+  });
+});
+
+describe('Experiencia3dPage — placas presas à cena', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    TestBed.configureTestingModule({
+      imports: [Experiencia3dPage],
+      providers: [provideDados({ fonte: 'local' }), provideRouter([])],
+    });
+  });
+
+  it('tem a fachada, as três placas de seção e uma etiqueta por categoria', async () => {
+    const fixture = TestBed.createComponent(Experiencia3dPage);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('[approtulocena="fachada"], app-placa-fachada')).not.toBeNull();
+    expect(el.querySelectorAll('app-placa-secao')).toHaveLength(3);
+    expect(el.querySelectorAll('app-etiqueta-skill')).toHaveLength(7);
+  });
+
+  it('a etiqueta de uma categoria escolhe a categoria e leva à floricultura', async () => {
+    const fixture = TestBed.createComponent(Experiencia3dPage);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    const estado = TestBed.inject(PortfolioStateService);
+
+    const etiqueta = [...el.querySelectorAll<HTMLButtonElement>('button.rotulo')].find((b) =>
+      b.textContent?.includes('Backend'),
+    )!;
+    etiqueta.click();
+    await fixture.whenStable();
+
+    expect(estado.areaAtual()).toBe('floricultura');
+    expect(estado.categoriaSkill()).toBe('BACKEND');
+    expect(etiqueta.getAttribute('aria-pressed')).toBe('true');
   });
 });

@@ -16,6 +16,7 @@ class MotorFalso {
   livraria = { destacar: vi.fn(), selecionar: vi.fn() };
   floricultura = { selecionar: vi.fn() };
   cafe = { marcarAberto: vi.fn(), marcarSobCursor: vi.fn(), marcarSinoSobCursor: vi.fn() };
+  rotulos = { registrar: vi.fn(), remover: vi.fn(), definirArea: vi.fn() };
   iniciar(_canvas: HTMLCanvasElement, opcoes: OpcoesMotor) {
     this.opcoes = opcoes;
   }

@@ -10,10 +10,12 @@ import {
   Object3D,
   PlaneGeometry,
   PointLight,
+  Vector3,
 } from 'three';
 
 import type { Projeto } from '../../core/models';
 import { PALETA, corDaCapa } from '../paleta';
+import type { AncoraRotulo } from '../rotulos';
 import type { ParteCena } from '../tipos';
 import {
   caixa,
@@ -112,6 +114,20 @@ export class LivrariaArea implements ParteCena {
     this.livrosGrupo.add(enfeites);
   }
 
+  /** Placa "Livraria" (HTML), pendurada acima da estante. */
+  ancoras(): AncoraRotulo[] {
+    return [
+      {
+        id: 'secao-livraria',
+        // Pela base, apoiada no alto da estante (mais alto sairia do enquadramento).
+        posicao: new Vector3(ESTANTE_X, 2.86, ESTANTE_Z + 0.25),
+        alinhamento: 'base',
+        areas: ['livraria', 'floricultura', 'cafe', 'aurora'],
+        distanciaReferencia: 5.5,
+      },
+    ];
+  }
+
   destacar(ids: ReadonlySet<string>): void {
     this.destacados = new Set(ids);
   }
@@ -177,7 +193,6 @@ export class LivrariaArea implements ParteCena {
     luz.position.set(0, yFita - 0.1, 0.35);
     this.grupo.add(fita, luz);
 
-    this.adicionarPlaca('Livraria · Projetos', 0, altura + 0.28, 1.9);
     this.adicionarPlaca(
       'Destaques',
       LARGURA / 2 - 0.45,
