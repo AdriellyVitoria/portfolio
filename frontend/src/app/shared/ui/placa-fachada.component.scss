@@ -1,0 +1,57 @@
+@use 'madeira' as *;
+
+:host {
+  display: block;
+}
+
+.placa {
+  @include madeira(#6f4630, $madeira-escura);
+  @include entalhe(7px);
+
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 20px 46px 18px;
+  border-radius: 16px;
+  text-align: center;
+
+  // Pregos de latão nos quatro cantos.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 9px;
+    border-radius: 10px;
+    background:
+      radial-gradient(circle, #e8b54a 0 2.5px, transparent 3px) top left / 12px 12px no-repeat,
+      radial-gradient(circle, #e8b54a 0 2.5px, transparent 3px) top right / 12px 12px no-repeat,
+      radial-gradient(circle, #e8b54a 0 2.5px, transparent 3px) bottom left / 12px 12px no-repeat,
+      radial-gradient(circle, #e8b54a 0 2.5px, transparent 3px) bottom right / 12px 12px no-repeat;
+    pointer-events: none;
+  }
+
+  &__titulo {
+    @include texto-entalhado;
+
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  &__sub {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--cor-amarelo);
+    font-family: var(--fonte-texto);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
