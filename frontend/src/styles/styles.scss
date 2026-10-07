@@ -8,6 +8,11 @@
 }
 
 html {
+  // Na experiência 3D, puxar a tela para baixo não recarrega a página (Chrome no Android).
+  &:has(app-experiencia-3d) {
+    overscroll-behavior: none;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     scroll-behavior: smooth;
   }

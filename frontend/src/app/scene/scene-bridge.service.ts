@@ -3,7 +3,7 @@ import { Injectable, effect, inject, signal } from '@angular/core';
 import { AuroraService } from '../core/aurora/aurora.service';
 import { PortfolioStateService } from '../core/state/portfolio-state.service';
 import { ESTACOES } from './estacoes';
-import { detectarQualidade, prefereMenosMovimento } from './qualidade';
+import { type NivelQualidade, detectarQualidade, prefereMenosMovimento } from './qualidade';
 import { SceneEngineService } from './scene-engine.service';
 import { resumirConversa } from './tela-aurora';
 import type { AlvoInterativo } from './tipos';
@@ -30,6 +30,10 @@ export class SceneBridgeService {
   /** A cena desenhou o primeiro frame (esconde a tela de carregamento). */
   readonly pronto = signal(false);
   readonly dicaCursor = signal<DicaCursor | null>(null);
+  /** Última medição (a cada ~2 s): FPS e nível de qualidade em uso. */
+  readonly desempenho = signal<{ fps: number; nivel: NivelQualidade } | null>(null);
+  /** Continua lento mesmo na qualidade mais baixa: a página oferece a versão simples. */
+  readonly lento = signal(false);
 
   constructor() {
     effect(() => {
@@ -86,6 +90,10 @@ export class SceneBridgeService {
         aoSoltar: () => undefined,
       },
       aoPrimeiroFrame: () => this.pronto.set(true),
+      aoMedirDesempenho: (fps, nivel, decisao) => {
+        this.desempenho.set({ fps: Math.round(fps), nivel });
+        if (decisao === 'lento-demais') this.lento.set(true);
+      },
     });
     this.ativo.set(true);
   }

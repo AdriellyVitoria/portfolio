@@ -125,6 +125,9 @@ export default class Experiencia3dPage {
   protected readonly secoes = SECOES;
   protected readonly itensTablet = ['Pergunte à Aurora'];
   protected readonly semWebGL = signal(false);
+  /** Medidor de FPS para testar no celular: abrir com `/3d?fps`. */
+  protected readonly mostrarFps = signal(false);
+  protected readonly avisoLentoFechado = signal(false);
 
   /** Área do menu (o balcão da Aurora conta como café). */
   protected readonly areaMenu = computed<Area>(() =>
@@ -197,6 +200,7 @@ export default class Experiencia3dPage {
 
     // WebGL só existe no navegador: nada de 3D no prerender.
     afterNextRender(() => {
+      this.mostrarFps.set(new URLSearchParams(location.search).has('fps'));
       if (!suportaWebGL()) {
         this.semWebGL.set(true);
         return;

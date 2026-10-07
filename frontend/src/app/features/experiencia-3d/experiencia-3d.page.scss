@@ -4,6 +4,7 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
+  touch-action: manipulation;
   background: #f2d4b0;
 }
 
@@ -32,6 +33,7 @@
 
   &:is(button) {
     cursor: pointer;
+    touch-action: manipulation;
   }
 
   &:focus-visible {
@@ -125,8 +127,10 @@
     margin: 0;
     padding: 0 0 var(--esp-1);
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     list-style: none;
     scrollbar-width: thin;
+    touch-action: pan-x;
   }
 
   &__resumo {
@@ -186,6 +190,31 @@
   }
 }
 
+// Celular deitado: pouca altura. A caixa da estação e o menu ficam lado a lado,
+// mais baixos, e a dica sai da tela (continua para leitores de tela).
+@media (orientation: landscape) and (max-height: 500px) {
+  .hud {
+    grid-auto-flow: column;
+    align-items: end;
+    justify-content: center;
+    gap: var(--esp-2);
+
+    &__estacao {
+      width: min(100%, 30rem);
+      padding: var(--esp-2) var(--esp-3);
+    }
+
+    &__dica {
+      @include somente-leitor-tela;
+    }
+
+    &__botao {
+      min-height: 40px;
+      padding-inline: var(--esp-3);
+    }
+  }
+}
+
 // Painel da Aurora: lateral no desktop, folha de meia tela no celular.
 // Não é modal: a cena continua visível e reage às ações da conversa.
 .aurora {
@@ -233,6 +262,61 @@
   font-weight: 600;
   pointer-events: none;
   transform: translate(14px, 14px);
+}
+
+.aviso-lento {
+  @extend %vidro;
+
+  position: absolute;
+  top: calc(var(--esp-4) + 3.25rem);
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2) var(--esp-3);
+  width: max-content;
+  max-width: calc(100% - 2 * var(--esp-4));
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--raio-lg);
+  font-size: var(--texto-sm);
+  transform: translateX(-50%);
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: var(--acao);
+    font-weight: 600;
+  }
+
+  button {
+    padding: var(--esp-1) var(--esp-3);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-pill);
+    background: var(--superficie);
+    color: var(--texto);
+    font: inherit;
+    cursor: pointer;
+  }
+}
+
+.medidor-fps {
+  position: absolute;
+  top: calc(var(--esp-4) + 3.25rem);
+  right: var(--esp-4);
+  z-index: 3;
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: var(--raio-pill);
+  background: rgb(38 19 9 / 75%);
+  color: #fff;
+  font:
+    600 0.75rem/1.6 ui-monospace,
+    monospace;
+  pointer-events: none;
 }
 
 .aviso-tela {

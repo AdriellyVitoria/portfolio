@@ -1,6 +1,6 @@
 import { MathUtils, type PerspectiveCamera, Spherical, Vector3 } from 'three';
 
-import type { Estacao } from './estacoes';
+import type { Enquadramento, Estacao } from './estacoes';
 
 // Quanto o visitante pode girar a câmera arrastando, dentro de uma estação (radianos).
 const LIMITE_AZIMUTE = 0.45;
@@ -26,6 +26,9 @@ export class CameraDirector {
   private readonly posicaoBase = new Vector3();
   readonly alvo = new Vector3();
 
+  private estacao?: Estacao;
+  private retrato = false;
+
   private azimute = 0;
   private polar = 0;
   private arrastando = false;
@@ -44,10 +47,12 @@ export class CameraDirector {
 
   /** Coloca a câmera na estação sem animação. */
   posicionar(estacao: Estacao): void {
-    this.posicaoBase.copy(estacao.posicao);
-    this.alvo.copy(estacao.alvo);
-    this.destinoPosicao.copy(estacao.posicao);
-    this.destinoAlvo.copy(estacao.alvo);
+    this.estacao = estacao;
+    const { posicao, alvo } = this.enquadramento(estacao);
+    this.posicaoBase.copy(posicao);
+    this.alvo.copy(alvo);
+    this.destinoPosicao.copy(posicao);
+    this.destinoAlvo.copy(alvo);
     this.progresso = 1;
     this.aplicar();
   }
@@ -60,11 +65,33 @@ export class CameraDirector {
       return;
     }
     // Parte de onde está agora, mesmo que outra transição esteja no meio.
+    this.estacao = estacao;
+    const { posicao, alvo } = this.enquadramento(estacao);
     this.origemPosicao.copy(this.posicaoBase);
     this.origemAlvo.copy(this.alvo);
-    this.destinoPosicao.copy(estacao.posicao);
-    this.destinoAlvo.copy(estacao.alvo);
+    this.destinoPosicao.copy(posicao);
+    this.destinoAlvo.copy(alvo);
     this.progresso = 0;
+  }
+
+  /**
+   * Tela em pé ou deitada (muda ao girar o celular). Troca o enquadramento da
+   * estação atual sem animação: é o próprio celular girando, não um passeio.
+   */
+  definirRetrato(retrato: boolean): void {
+    if (retrato === this.retrato) return;
+    this.retrato = retrato;
+    if (this.estacao && !this.emTransicao) {
+      this.posicionar(this.estacao);
+    } else if (this.estacao) {
+      const { posicao, alvo } = this.enquadramento(this.estacao);
+      this.destinoPosicao.copy(posicao);
+      this.destinoAlvo.copy(alvo);
+    }
+  }
+
+  private enquadramento(estacao: Estacao): Enquadramento {
+    return (this.retrato && estacao.retrato) || estacao;
   }
 
   /** Arrasto em pixels desde o último evento. */

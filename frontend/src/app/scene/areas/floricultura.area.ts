@@ -187,6 +187,8 @@ export class FloriculturaArea implements ParteCena {
           alinhamento: lado === 'esquerda' ? 'direita' : 'esquerda',
           areas: ['floricultura'],
           distanciaReferencia: 3.6,
+          // No celular em pé não cabem ao lado das estantes: as skills ficam no painel.
+          larguraMinima: 640,
         };
       }),
     ];

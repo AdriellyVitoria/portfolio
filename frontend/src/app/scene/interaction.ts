@@ -28,12 +28,14 @@ export class Interacao {
   private inicio: { x: number; y: number } | null = null;
   private ultimo = { x: 0, y: 0 };
   private arrastou = false;
+  /** Só o primeiro dedo conta; um segundo dedo (pinça) cancela o gesto. */
+  private ponteiroAtivo: number | null = null;
 
   private readonly ouvintes: [keyof HTMLElementEventMap, (e: PointerEvent) => void][] = [
     ['pointerdown', (e) => this.aoPressionar(e)],
     ['pointermove', (e) => this.aoMover(e)],
     ['pointerup', (e) => this.aoLevantar(e)],
-    ['pointercancel', () => this.cancelar()],
+    ['pointercancel', (e) => this.aoCancelar(e)],
     ['pointerleave', () => this.sair()],
   ];
 
@@ -58,6 +60,12 @@ export class Interacao {
   }
 
   private aoPressionar(e: PointerEvent): void {
+    if (this.ponteiroAtivo !== null) {
+      // Segundo dedo: não é clique nem arrasto de um dedo. Encerra o gesto.
+      this.cancelar();
+      return;
+    }
+    this.ponteiroAtivo = e.pointerId;
     this.inicio = { x: e.clientX, y: e.clientY };
     this.ultimo = { ...this.inicio };
     this.arrastou = false;
@@ -65,6 +73,7 @@ export class Interacao {
   }
 
   private aoMover(e: PointerEvent): void {
+    if (this.ponteiroAtivo !== null && e.pointerId !== this.ponteiroAtivo) return;
     if (this.inicio) {
       if (
         !this.arrastou &&
@@ -90,12 +99,19 @@ export class Interacao {
   }
 
   private aoLevantar(e: PointerEvent): void {
+    if (e.pointerId !== this.ponteiroAtivo) return;
+    this.ponteiroAtivo = null;
     if (this.inicio && !this.arrastou) {
       const alvo = this.testar(e.clientX, e.clientY);
       if (alvo) {
         this.callbacks.aoSelecionar(alvo);
       }
     }
+    this.cancelar();
+  }
+
+  private aoCancelar(e: PointerEvent): void {
+    if (e.pointerId === this.ponteiroAtivo) this.ponteiroAtivo = null;
     this.cancelar();
   }
 

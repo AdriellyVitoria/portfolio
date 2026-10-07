@@ -4,6 +4,7 @@
   width: 100%;
   max-width: 100%;
   max-height: 90dvh;
+  overscroll-behavior: contain; // rolar até o fim do painel não puxa a página
   margin: auto auto 0; // mobile: folha que sobe do rodapé
   padding: 0;
   border: none;

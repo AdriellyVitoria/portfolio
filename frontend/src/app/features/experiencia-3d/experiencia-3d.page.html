@@ -74,6 +74,20 @@
   </div>
 }
 
+@if (ponte.lento() && !avisoLentoFechado()) {
+  <div class="aviso-lento" role="status">
+    <p>A cena 3D está pesada neste aparelho.</p>
+    <a routerLink="/simples">Ver a versão simples</a>
+    <button type="button" aria-label="Continuar no 3D" (click)="avisoLentoFechado.set(true)">
+      Continuar
+    </button>
+  </div>
+}
+
+@if (mostrarFps() && ponte.desempenho(); as d) {
+  <p class="medidor-fps" aria-hidden="true">{{ d.fps }} fps · {{ d.nivel }}</p>
+}
+
 @if (ponte.dicaCursor(); as dica) {
   <div class="dica-cursor" aria-hidden="true" [style.left.px]="dica.x" [style.top.px]="dica.y">
     {{ dica.rotulo }}

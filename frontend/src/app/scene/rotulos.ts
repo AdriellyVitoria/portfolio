@@ -18,6 +18,8 @@ export interface AncoraRotulo {
   areas: readonly Area[];
   /** Distância (m) em que o rótulo aparece no tamanho natural; mais longe, encolhe. */
   distanciaReferencia: number;
+  /** Largura mínima da tela (px) para mostrar o rótulo; abaixo disso ele não cabe. */
+  larguraMinima?: number;
 }
 
 const DESLOCAMENTO: Record<Alinhamento, string> = {
@@ -82,14 +84,14 @@ export class RotulosCena {
 
   /** Chamado a cada frame, depois do render. `largura`/`altura` em pixels do canvas. */
   atualizar(camera: PerspectiveCamera, largura: number, altura: number): void {
-    // Telas estreitas (celular): rótulos um pouco menores.
-    const escalaTela = MathUtils.clamp(largura / 1280, 0.62, 1);
+    // Telas pequenas (celular em pé ou deitado): rótulos menores. Vale o lado mais apertado.
+    const escalaTela = MathUtils.clamp(Math.min(largura / 1280, altura / 800), 0.5, 1);
 
     for (const rotulo of this.rotulos.values()) {
       const { ancora, elemento } = rotulo;
       if (!ancora || !elemento) continue;
 
-      if (!ancora.areas.includes(this.area)) {
+      if (!ancora.areas.includes(this.area) || largura < (ancora.larguraMinima ?? 0)) {
         this.esconder(rotulo);
         continue;
       }

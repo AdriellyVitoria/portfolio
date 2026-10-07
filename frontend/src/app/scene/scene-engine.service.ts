@@ -18,7 +18,8 @@ import { LivrariaArea } from './areas/livraria.area';
 import { CameraDirector } from './camera-director';
 import type { Estacao } from './estacoes';
 import { type CallbacksInteracao, Interacao } from './interaction';
-import type { ConfigQualidade } from './qualidade';
+import { type DecisaoDesempenho, MonitorDesempenho } from './desempenho';
+import { type ConfigQualidade, type NivelQualidade, configDe } from './qualidade';
 import { RotulosCena } from './rotulos';
 import type { ParteCena } from './tipos';
 import { descartar } from './util';
@@ -29,6 +30,8 @@ export interface OpcoesMotor {
   estacaoInicial: Estacao;
   callbacks: CallbacksInteracao;
   aoPrimeiroFrame(): void;
+  /** A cada medição de FPS (a cada ~2 s): para o medidor de depuração e o aviso de lentidão. */
+  aoMedirDesempenho?(fps: number, nivel: NivelQualidade, decisao: DecisaoDesempenho): void;
 }
 
 const COR_CEU = 0xf2d4b0; // fim de tarde de outono
@@ -50,6 +53,10 @@ export class SceneEngineService {
   private observadorTamanho?: ResizeObserver;
   private partes: ParteCena[] = [];
   private ambiente?: Ambiente;
+  private folhas?: Folhas;
+  private monitor?: MonitorDesempenho;
+  private aoMedirDesempenho?: OpcoesMotor['aoMedirDesempenho'];
+  private qualidade?: ConfigQualidade;
 
   private ultimoInstante = 0;
   private tempo = 0;
@@ -82,8 +89,11 @@ export class SceneEngineService {
     this.livraria = new LivrariaArea();
     this.floricultura = new FloriculturaArea();
     this.cafe = new CafeArea(opcoes.reduzirMovimento);
-    const folhas = new Folhas(qualidade.folhas, opcoes.reduzirMovimento);
-    this.partes = [this.ambiente, this.livraria, this.floricultura, this.cafe, folhas];
+    this.folhas = new Folhas(qualidade.folhas, opcoes.reduzirMovimento);
+    this.partes = [this.ambiente, this.livraria, this.floricultura, this.cafe, this.folhas];
+    this.qualidade = qualidade;
+    this.monitor = new MonitorDesempenho(qualidade.nivel);
+    this.aoMedirDesempenho = opcoes.aoMedirDesempenho;
     this.partes.forEach((parte) => this.cena.add(parte.grupo));
 
     this.director = new CameraDirector(this.camera, opcoes.reduzirMovimento);
@@ -131,6 +141,8 @@ export class SceneEngineService {
     this.renderer?.forceContextLoss();
     this.renderer = undefined;
     this.partes = [];
+    this.folhas = undefined;
+    this.monitor = undefined;
   }
 
   private atualizarAncoras(): void {
@@ -155,14 +167,17 @@ export class SceneEngineService {
 
   private iniciarLoop(): void {
     this.ultimoInstante = performance.now();
+    this.monitor?.reiniciar();
     this.renderer?.setAnimationLoop((instante) => this.quadro(instante));
   }
 
   private quadro(instante: number): void {
+    const dtReal = (instante - this.ultimoInstante) / 1000;
     // Limita o dt: depois de uma pausa longa, nada "salta".
-    const dt = Math.min(0.05, (instante - this.ultimoInstante) / 1000);
+    const dt = Math.min(0.05, dtReal);
     this.ultimoInstante = instante;
     this.tempo += dt;
+    this.medirDesempenho(dtReal);
 
     this.director?.update(dt);
     for (const parte of this.partes) {
@@ -176,6 +191,38 @@ export class SceneEngineService {
       this.aoPrimeiroFrame();
       this.aoPrimeiroFrame = undefined;
     }
+  }
+
+  private medirDesempenho(dtReal: number): void {
+    if (!this.monitor) return;
+    const decisao = this.monitor.registrar(dtReal);
+    if (!decisao) return;
+    if (decisao === 'baixar') this.aplicarQualidade(configDe(this.monitor.nivel));
+    this.aoMedirDesempenho?.(this.monitor.fps, this.monitor.nivel, decisao);
+  }
+
+  /**
+   * Troca a qualidade com a cena rodando: resolução, sombras e folhas.
+   * (O antialias é do contexto WebGL e só muda recriando o renderer: fica como está.)
+   */
+  private aplicarQualidade(qualidade: ConfigQualidade): void {
+    if (!this.renderer || !this.qualidade) return;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, qualidade.pixelRatioMaximo));
+    this.redimensionar(this.renderer.domElement);
+    if (this.qualidade.sombras !== qualidade.sombras) {
+      this.renderer.shadowMap.enabled = qualidade.sombras;
+      // Os shaders foram compilados com sombra: precisam ser refeitos.
+      this.cena.traverse((objeto) => {
+        const material = (
+          objeto as { material?: { needsUpdate: boolean } | { needsUpdate: boolean }[] }
+        ).material;
+        for (const m of Array.isArray(material) ? material : material ? [material] : []) {
+          m.needsUpdate = true;
+        }
+      });
+    }
+    this.folhas?.limitar(qualidade.folhas);
+    this.qualidade = qualidade;
   }
 
   /** Aba escondida = loop parado (economiza bateria e GPU). */
@@ -193,6 +240,7 @@ export class SceneEngineService {
     if (!this.renderer || !largura || !altura) return;
     this.renderer.setSize(largura, altura, false);
     this.camera.aspect = largura / altura;
+    this.director?.definirRetrato(this.camera.aspect < 1);
     // Em retrato (celular), abre o campo de visão para caber a mesma cena.
     this.camera.fov =
       this.camera.aspect < 1 ? Math.min(75, (50 / Math.max(this.camera.aspect, 0.5)) * 0.7) : 50;

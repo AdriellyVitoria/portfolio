@@ -32,10 +32,17 @@ describe('RotulosCena', () => {
     const elemento = montar(ancora());
 
     expect(elemento.style.opacity).toBe('1');
-    // Centro da tela, encostado pela base, no tamanho natural (na distância de referência).
+    // Centro da tela, encostado pela base, na distância de referência. A tela de 1000x500
+    // é baixa: vale a altura (500/800 = 0.625).
     expect(elemento.style.transform).toBe(
-      'translate3d(500.0px, 250.0px, 0) translate(-50%, -100%) scale(0.781)',
+      'translate3d(500.0px, 250.0px, 0) translate(-50%, -100%) scale(0.625)',
     );
+  });
+
+  it('esconde o rótulo com largura mínima quando a tela é estreita', () => {
+    const elemento = montar(ancora({ larguraMinima: 1200 }));
+
+    expect(elemento.style.opacity).toBe('0');
   });
 
   it('alinhamento de lado: encosta pela borda, centralizado na vertical', () => {

@@ -14,9 +14,13 @@ const CONFIGS: Record<NivelQualidade, ConfigQualidade> = {
   baixa: { nivel: 'baixa', pixelRatioMaximo: 1, sombras: false, folhas: 50, antialias: false },
 };
 
+export function configDe(nivel: NivelQualidade): ConfigQualidade {
+  return CONFIGS[nivel];
+}
+
 /**
  * Palpite inicial de qualidade. Celulares (toque) e máquinas com poucos núcleos
- * começam em "média". (A medição de FPS em tempo real entra na fase 8.)
+ * começam em "média". Depois, o FPS medido (MonitorDesempenho) pode baixar o nível.
  */
 export function detectarQualidade(): ConfigQualidade {
   if (typeof window === 'undefined') {

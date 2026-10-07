@@ -144,9 +144,16 @@ export class Folhas implements ParteCena {
     this.aplicar(0);
   }
 
+  /** Menos folhas caindo (qualidade mais baixa). Só diminui: as instâncias já existem. */
+  limitar(quantidade: number): void {
+    if (!this.caindo) return;
+    this.caindo.count = Math.min(quantidade, this.folhas.length);
+  }
+
   update(dt: number, tempo: number): void {
     if (!this.caindo) return;
-    for (const folha of this.folhas) {
+    for (let i = 0; i < this.caindo.count; i++) {
+      const folha = this.folhas[i];
       folha.y -= folha.velocidade * dt;
       folha.x += 0.18 * dt; // vento leve, sempre para o mesmo lado
       if (folha.y < 0.05) {
@@ -172,7 +179,8 @@ export class Folhas implements ParteCena {
   /** Queda de folha de verdade: balança de um lado para o outro e inclina junto. */
   private aplicar(tempo: number): void {
     if (!this.caindo) return;
-    this.folhas.forEach((folha, i) => {
+    for (let i = 0; i < this.caindo.count; i++) {
+      const folha = this.folhas[i];
       const onda = Math.sin(tempo * folha.balanco + folha.fase);
       this.auxiliar.position.set(folha.x + onda * 0.35, folha.y, folha.z);
       this.auxiliar.rotation.set(
@@ -183,8 +191,8 @@ export class Folhas implements ParteCena {
       );
       this.auxiliar.scale.setScalar(folha.escala);
       this.auxiliar.updateMatrix();
-      this.caindo!.setMatrixAt(i, this.auxiliar.matrix);
-    });
+      this.caindo.setMatrixAt(i, this.auxiliar.matrix);
+    }
     this.caindo.instanceMatrix.needsUpdate = true;
   }
 }
